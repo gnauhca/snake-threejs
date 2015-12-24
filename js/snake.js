@@ -18,20 +18,7 @@ hit();
 无敌
 
 */
-function createMesh(geom, color) {
-	var color = color || 0xffffff;
 
-    // assign two materials
-    var meshMaterial = new THREE.MeshLambertMaterial({"color": color});
-    meshMaterial.side = THREE.DoubleSide;
-    var wireFrameMat = new THREE.MeshBasicMaterial();
-    wireFrameMat.wireframe = true;
-
-    // create a multimaterial
-    var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial, wireFrameMat]);
-
-    return mesh;
-}
 
 // set head tail position
 
@@ -40,15 +27,20 @@ define(function(require, exports, module) {
 	var Life = require('life');
 	var Snake = Life.extend(function(scene, options) {
 
-		var w = scene.gridWidth;
+		var w = scene.gridWidth,
+			that = this;
 
 		this.head;
 		this.tail;
+		this.body; //shape
 		this.sizeData = [[0,0,1], [0,1,1], [0,2,1], [0,3,1]];//[x,z,正反面1for正]
 		this.nextSizeData;
 		this.dir = 0; //0 - 3 -> 上 - 左 上为y轴正方向
 
-		this.contructor = function() {
+		this.contructor = function(scene, options) {
+
+			this.options = extend(true, {}, options);
+
 			this.sizeData = ['001', '011', '021', '031'];
 			this.nextSizeData = extend(true, [], this.sizeData);
 			this.head = this._createHead();
@@ -69,8 +61,44 @@ define(function(require, exports, module) {
 			return createMesh(headGem);
 		}
 
-		function getBody(shape) {
+		/* 画蛇！！！！*/
+		this._drawBody = function(shape) {
 
+		}
+
+		this._drawFirst = function(shape, ax, ay) {
+
+		}
+
+		this._drawLast = function(shape, type, percent) {
+
+		}
+
+		this._draw = function(firstType, lastType) {
+			scene.remove(this.body);
+			var shape = new THREE.Shape();
+
+			this._drawFirst(shape);
+			this._drawBody(shape);
+			this._drawLast(shape);
+
+            this.body = new THREE.TubeGeometry(new THREE.SplineCurve3(shape.createPointsGeometry(10).vertices), 50, 3, 8, false);
+		}
+
+		this._setHeadTailPos = function(cylinder, angle, size) {
+
+		}
+		/* over 画蛇！！！！*/
+
+
+		function move() {
+
+
+
+			// 判断碰撞
+			this.addTween({'percent': 0}, {'percent': 1}, this.options.speed, function() {
+				that._draw();
+			}, move());
 		}
 
 		this._grow = function(length) {}
@@ -114,14 +142,6 @@ define(function(require, exports, module) {
 
 
 
-
-
-
-
-	// private
-	function setHeadTailPos(cylinder, angle, size) {
-		
-	}
 
 
 	module.exports = Snake;
