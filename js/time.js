@@ -95,7 +95,7 @@ var TimeBody = Class.extend(function TimeBody() {
 	 */
 	this.addTween = function(A, B, time, updateFn, endFn) {
 		var tween = new TWEEN.Tween(A).to(B).onUpdate(function() {
-			updateFn();
+			updateFn(this);
 		}).onComplete(function() {
 			that.removeTween(tween);
 			endFn();
