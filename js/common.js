@@ -66,9 +66,9 @@
 				initialize.apply(this,[to]);
 				//Setup scope for class instance method calls
 				cloneCopy(this,this);
+				this.constructor.apply(this,arguments);
 				if(this.initializer instanceof Function)
 					this.initializer.apply(this);
-				this.constructor.apply(this,arguments);
 			}
 		}
 

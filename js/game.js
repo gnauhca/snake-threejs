@@ -31,13 +31,17 @@ define(function(require, exports, module) {
 
 		this.timeThings = [];
 		//this.gameUI;
-		this.scene = new Scene(document.getElementById('#renderDom'));
+		this.scene = new Scene(document.getElementById('renderDom'));
 
 		this.init = function() {
 			console.log('init');
 			var snake = new Snake(this.scene, {
 				speed: gameData.speed
 			});
+			snake._draw();
+			TIME.start();
+			this.start();
+
 		}
 
 		this.start = function() {

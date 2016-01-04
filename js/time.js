@@ -21,7 +21,7 @@ TIME.removeBody = function(timeBody) {
 }
 
 TIME.tick = function() {
-	this.handleFrame();
+	TIME.handleFrame();
 
 	if (!stop) {
 		requestAnimationFrame(TIME.tick);
@@ -39,7 +39,7 @@ TIME.stop = function() {
 
 TIME.handleFrame = function() {
 	this.bodys.forEach(function(body) {
-		body.frameTasks.forEach(function(frametask) {
+		body.frameTasks.forEach(function(frameTask) {
 			frameTask.fn && frameTask.fn();
 		});
 	});
