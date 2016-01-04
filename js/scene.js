@@ -32,7 +32,7 @@ var Scene = Time.extend(function () {
 		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.x = 0;
         this.camera.position.y = 0;
-        this.camera.position.z = 200;
+        this.camera.position.z = 100;
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 		this.scene.add(this.camera);
 
@@ -44,7 +44,7 @@ var Scene = Time.extend(function () {
 
 		// create the ground plane
 		var planeGeometry = new THREE.PlaneGeometry(1000, 1000, 100, 100);
-		var planeMaterial = new THREE.MeshBasicMaterial({color: 0xffffff, wireframe: true});
+		var planeMaterial = new THREE.MeshBasicMaterial({color: 0x888888, wireframe: true});
 		var plane = new THREE.Mesh(planeGeometry, planeMaterial);
 		plane.receiveShadow = true;
 

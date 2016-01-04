@@ -22,7 +22,7 @@ define(function(require, exports, module) {
 	var Game = TimeBody.extend(function(gameData) {
 		var score;
 		var gameData = extend(true, {
-			speed: 800, //蛇的速度
+			speed: 2000, //蛇的速度
 			mapInfo: {},
 			blocks: {},//障碍
 			time: 120,//总时间限制
@@ -38,7 +38,8 @@ define(function(require, exports, module) {
 			var snake = new Snake(this.scene, {
 				speed: gameData.speed
 			});
-			snake._draw();
+			this.timeThings.push(snake);
+			//snake._draw();
 			TIME.start();
 			this.start();
 

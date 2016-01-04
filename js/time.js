@@ -24,7 +24,8 @@ TIME.tick = function() {
 	TIME.handleFrame();
 
 	if (!stop) {
-		requestAnimationFrame(TIME.tick);
+		//requestAnimationFrame(TIME.tick);
+		setTimeout(TIME.tick, 20);
 	}
 }
 
@@ -94,7 +95,7 @@ var TimeBody = Class.extend(function TimeBody() {
 	 * @param timegap 与上一帧的时间间隔
 	 */
 	this.addTween = function(A, B, time, updateFn, endFn) {
-		var tween = new TWEEN.Tween(A).to(B).onUpdate(function() {
+		var tween = new TWEEN.Tween(A).to(B, time).onUpdate(function() {
 			updateFn(this);
 		}).onComplete(function() {
 			that.removeTween(tween);
@@ -105,7 +106,7 @@ var TimeBody = Class.extend(function TimeBody() {
 	}
 
 	this.removeTween = function(tween) {
-		var index = this.tweens.indexOf(timeBody);
+		var index = this.tweens.indexOf(tween);
 
 		if (index !== -1) {
 			this.tweens.splice(index, 1);

@@ -51,9 +51,9 @@ define(function(require, exports, module) {
 		this.body; //shape
 		this.sizeData;//[x,z,正反面1for正]
 		this.nextSizeData;
-		this.dir = 0; //0 - 3 -> 上 - 左 上为y轴正方向
+		this.dir = 2; //0 - 3 -> 上 - 左 上为y轴正方向
 		this.percent;
-		this.segment = 10;// 一个格子分为10段
+		this.segment = 20;// 一个格子分为10段
 
 		this.constructor = function(_scene, options) {
 			this.super();
@@ -61,23 +61,28 @@ define(function(require, exports, module) {
 			w = _scene.gridWidth,
 			this.options = extend(true, {}, options);
 
-			this.sizeData = [[1,0,1], [0,1,1], [0,2,1], [0,3,1]];
+			this.sizeData = [[0,0,1], [0,1,1], [0,2,1], [0,3,1]];
 			this.nextSizeData = extend(true, [], this.sizeData);
 			this.head = this._createHead();
 			this.tail = this._createTail();
 
+			this.head.position.set(10, 10, 1);
+			this.head.rotation.z = -Math.PI/2;
+
 			scene.add(this.head);
 			scene.add(this.tail);
+
+			move();
 		}
 
 		this._createHead = function() {
 			//radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded
-			var headGem = new THREE.CylinderGeometry(0, w*0.8, w*0.8, 6, 2, false);
+			var headGem = new THREE.CylinderGeometry(0, w*0.4, w, 8, 2, false);
 			return createMesh(headGem);
 		}
 
 		this._createTail = function() {
-			var headGem = new THREE.CylinderGeometry(0, w*0.5, w, 6, 2, false);
+			var headGem = new THREE.CylinderGeometry(0, w*0.2, w, 8, 2, false);
 			return createMesh(headGem);
 		}
 
@@ -97,7 +102,10 @@ define(function(require, exports, module) {
 			if (endPoint1[0] === endPoint2[0] || endPoint1[1] === endPoint2[1]) {
 				// 画直线
 				curve = new THREE.LineCurve(
-								new THREE.Vector2(endPoint1[0] * w, endPoint1[1] * w),
+								new THREE.Vector2(
+									(endPoint2[0] + (endPoint1[0]-endPoint2[0])*percent) * w, 
+									(endPoint2[1] + (endPoint1[1]-endPoint2[1])*percent) * w
+								),
 								new THREE.Vector2(endPoint2[0] * w, endPoint2[1] * w)
 							);
 
@@ -115,26 +123,22 @@ define(function(require, exports, module) {
 
 				if (t[0] < 0 && t[1] > 0) {
 					// 左上 
-					startAngle = 1.5 * Math.PI;
-					endAngle = startAngle - (0.5 * Math.PI * percent);
+					endAngle = Math.PI;
 					aClockwise = true;
 				} else if (t[0] > 0 && t[1] > 0) {
 					// 右上
-					startAngle = 1.5 * Math.PI;
-					endAngle = startAngle + (0.5 * Math.PI * percent);
+					endAngle = 0;
 					aClockwise = false;
 				} else if (t[0] > 0 && t[1] < 0) {
 					// 右下
-					startAngle = Math.PI;
-					endAngle = startAngle + (0.5 * Math.PI * percent);
+					endAngle = 1.5*Math.PI;
 					aClockwise = false;
 				} else if (t[0] < 0 && t[1] < 0) {
 					// 左下
-					startAngle = 2 * Math.PI;
-					endAngle = startAngle - (0.5 * Math.PI * percent);
+					endAngle = 1.5 * Math.PI;
 					aClockwise = true;
 				}
-
+				startAngle = endAngle + Math.PI*0.5*(aClockwise?1:-1)*percent;
 				console.log(startAngle, endAngle);
 
 				curve = new THREE.EllipseCurve(
@@ -144,16 +148,17 @@ define(function(require, exports, module) {
 					aClockwise,            // aClockwise
 					0                 // aRotation 
 				);
+				console.log(percent)
 			}
-			return curve.getPoints(parseInt(this.segment * percent));
+			return curve.getPoints(parseInt(that.segment * percent));
 		}
 
 		this._drawBody = function() {
 			var pointArr = [],
 				points;
 
-			for (var i = 1; i < this.nextSizeData.length -2; i++) {
-				points = drawGrid(this.nextSizeData[i], this.nextSizeData[i+1], this.nextSizeData[i+2], 1);
+			for (var i = 2; i < this.nextSizeData.length - 1; i++) {
+				points = drawGrid(this.nextSizeData[i-1], this.nextSizeData[i], this.nextSizeData[i+1], 1);
 				pointArr = pointArr.concat(points);
 			}
 			return pointArr;
@@ -186,13 +191,15 @@ define(function(require, exports, module) {
 
 			points = points.concat(this._drawFirst());
 			points = points.concat(this._drawBody());
-			points = points.concat(this._drawLast());
+			//points = points.concat(this._drawLast());
 			points = points.map(function(vec) {
 				return (new THREE.Vector3(vec.x, vec.y, 1));
 			});
 			console.log(points);
-            this.body = createMesh(new THREE.TubeGeometry(new THREE.SplineCurve3(points), 50, 2, 3, false));
+            this.body = createMesh(new THREE.TubeGeometry(new THREE.SplineCurve3(points), 50, w*0.2, 8, false));
 
+            this._setHeadTailPos(this.head, points[0], points[1]);
+            this._setHeadTailPos(this.tail, points[points.length-1], points[points.length-2]);
 
 			/*var curve = new THREE.EllipseCurve(
 				5,  5,            // ax, aY
@@ -210,20 +217,36 @@ define(function(require, exports, module) {
             scene.add(this.body);
 		}
 
-		this._setHeadTailPos = function(cylinder, angle, size) {
+		this._setHeadTailPos = function(mesh, point1, point2) {
+			var angle = Math.atan((point1.y-point2.y)/(point1.x-point2.x));
 
+			if (point1.y < point2.y && point1.x < point2.x) {
+				angle += Math.PI;
+			} else if (point1.y > point2.y && point1.x < point2.x){
+				angle += Math.PI;
+			}
+
+			angle -= Math.PI/2;
+
+			var scale = (0.5*w)/Math.sqrt((point1.x-point2.x)*(point1.x-point2.x)+(point1.y-point2.y)*(point1.y-point2.y));
+
+			mesh.position.x = point1.x + (point1.x-point2.x)*scale;
+			mesh.position.y = point1.y + (point1.y-point2.y)*scale;
+			mesh.rotation.z = angle;
 		}
 		/* over 画蛇！！！！*/
 
 
 		function move() {
+
+			that.setNextData();
+
 			// 判断碰撞
 			that.addTween({'percent': 0}, {'percent': 1}, that.options.speed, function(current) {
+				that.percent = current.percent;
 				that._draw(current);
 			}, move);
 		}
-
-		this._grow = function(length) {}
 
 		this.goLeft = function() {
 			this.setOrder(this.dir--);
@@ -239,11 +262,14 @@ define(function(require, exports, module) {
 			if (dir === (this.dir - 2) % 4) {
 				dir = this.dir;
 			}
+			this.dir = dir;
+		}
 
+		this.setNextData = function() {
 			this.nextSizeData = extend(true, [], this.sizeData);
 
-			var newGrid = this.nextSizeData[0];
-			switch (dir) {
+			var newGrid = extend(true, [], this.nextSizeData[0]);
+			switch (this.dir) {
 				case 0:
 					newGrid[1]--;
 					break;
@@ -256,8 +282,7 @@ define(function(require, exports, module) {
 				case 3:
 					newGrid[0]--;
 			}
-			this.nextSizeData.shift(newGrid);
-			this.dir = dir;
+			this.nextSizeData.unshift(newGrid);	
 		}
 	});
 
