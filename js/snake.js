@@ -51,7 +51,7 @@ define(function(require, exports, module) {
 		this.body; //shape
 		this.sizeData;//[x,z,正反面1for正]
 		this.nextSizeData;
-		this.dir = 2; //0 - 3 -> 上 - 左 上为y轴正方向
+		this.dir = 0; //0 - 3 -> 上 - 左 上为y轴正方向
 		this.percent;
 		this.segment = 20;// 一个格子分为10段
 
@@ -61,7 +61,7 @@ define(function(require, exports, module) {
 			w = _scene.gridWidth,
 			this.options = extend(true, {}, options);
 
-			this.sizeData = [[0,0,1], [0,1,1], [0,2,1], [0,3,1]];
+			this.sizeData = this.nextSizeData = [[0,0,1], [0,-1,1], [0,-2,1]];
 			this.nextSizeData = extend(true, [], this.sizeData);
 			this.head = this._createHead();
 			this.tail = this._createTail();
@@ -77,12 +77,12 @@ define(function(require, exports, module) {
 
 		this._createHead = function() {
 			//radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded
-			var headGem = new THREE.CylinderGeometry(0, w*0.4, w, 8, 2, false);
+			var headGem = new THREE.CylinderGeometry(0, w*0.4, w, 5, 1, false);
 			return createMesh(headGem);
 		}
 
 		this._createTail = function() {
-			var headGem = new THREE.CylinderGeometry(0, w*0.2, w, 8, 2, false);
+			var headGem = new THREE.CylinderGeometry(0, w*0.18, w, 8, 1, false);
 			return createMesh(headGem);
 		}
 
@@ -131,15 +131,15 @@ define(function(require, exports, module) {
 					aClockwise = false;
 				} else if (t[0] > 0 && t[1] < 0) {
 					// 右下
-					endAngle = 1.5*Math.PI;
-					aClockwise = false;
+					endAngle = 0;
+					aClockwise = true;
 				} else if (t[0] < 0 && t[1] < 0) {
 					// 左下
-					endAngle = 1.5 * Math.PI;
-					aClockwise = true;
+					endAngle = Math.PI;
+					aClockwise = false;
 				}
 				startAngle = endAngle + Math.PI*0.5*(aClockwise?1:-1)*percent;
-				console.log(startAngle, endAngle);
+				//console.log(startAngle, endAngle);
 
 				curve = new THREE.EllipseCurve(
 					center[0]*w,  center[1]*w,            // ax, aY
@@ -148,7 +148,7 @@ define(function(require, exports, module) {
 					aClockwise,            // aClockwise
 					0                 // aRotation 
 				);
-				console.log(percent)
+				//console.log(percent)
 			}
 			return curve.getPoints(parseInt(that.segment * percent));
 		}
@@ -181,48 +181,37 @@ define(function(require, exports, module) {
 							(nowLast[1] + (nowLast[1]-nowPenult[1])) + '' + 1;
 			}
  
-			return drawGrid(prevLast, nowLast, nowPenult, 1 - this.percent);
+			return drawGrid(prevLast, nowLast, nowPenult, 1 - this.percent).reverse();
 		}
 
-		this._draw = function(percent) {
+		this._draw = function() {
 			var points = [];
 
 			scene.remove(this.body);
 
 			points = points.concat(this._drawFirst());
 			points = points.concat(this._drawBody());
-			//points = points.concat(this._drawLast());
+			points = points.concat(this._drawLast());
 			points = points.map(function(vec) {
 				return (new THREE.Vector3(vec.x, vec.y, 1));
 			});
-			console.log(points);
-            this.body = createMesh(new THREE.TubeGeometry(new THREE.SplineCurve3(points), 50, w*0.2, 8, false));
+			//console.log(points);
+            this.body = createMesh(new THREE.TubeGeometry(new THREE.SplineCurve3(points), 50, w*0.18, 8, false));
 
             this._setHeadTailPos(this.head, points[0], points[1]);
             this._setHeadTailPos(this.tail, points[points.length-1], points[points.length-2]);
 
-			/*var curve = new THREE.EllipseCurve(
-				5,  5,            // ax, aY
-				w/2, w/2,           // xRadius, yRadius
-				0,  3.14,  // aStartAngle, aEndAngle
-				true,            // aClockwise
-				0                 // aRotation 
-			);
-
-			scene.add(createMesh(new THREE.TubeGeometry(
-			new THREE.SplineCurve3(curve.getPoints(10).map(function(vec) {
-				return (new THREE.Vector3(vec.x, vec.y, 1));
-			})), 50, 2, 3, false)));*/
-
             scene.add(this.body);
+            //console.log(this.sizeData);
+            //console.log(this.nextSizeData.toString());
 		}
 
 		this._setHeadTailPos = function(mesh, point1, point2) {
 			var angle = Math.atan((point1.y-point2.y)/(point1.x-point2.x));
 
-			if (point1.y < point2.y && point1.x < point2.x) {
+			if (point1.y <= point2.y && point1.x <= point2.x) {
 				angle += Math.PI;
-			} else if (point1.y > point2.y && point1.x < point2.x){
+			} else if (point1.y >= point2.y && point1.x <= point2.x){
 				angle += Math.PI;
 			}
 
@@ -239,13 +228,30 @@ define(function(require, exports, module) {
 
 		function move() {
 
+			that.sizeData = that.nextSizeData;
 			that.setNextData();
+			that.nextSizeData.pop();
+
+			console.log(that.nextSizeData.toString())
+
+			that.percent = 0;
+
+			that.setOrder(that.dir+1)
+			var a = function() {
+				if (that.percent < 1) {
+					that.percent+=0.05;that._draw();
+					setTimeout(a, 100);					
+				} else {
+					//move();
+				}
+			};
+			a();
 
 			// 判断碰撞
-			that.addTween({'percent': 0}, {'percent': 1}, that.options.speed, function(current) {
+			/*that.addTween({'percent': 0}, {'percent': 1}, that.options.speed, function(current) { console.log(current);
 				that.percent = current.percent;
 				that._draw(current);
-			}, move);
+			}, move);*/
 		}
 
 		this.goLeft = function() {
@@ -271,7 +277,7 @@ define(function(require, exports, module) {
 			var newGrid = extend(true, [], this.nextSizeData[0]);
 			switch (this.dir) {
 				case 0:
-					newGrid[1]--;
+					newGrid[1]++;
 					break;
 				case 1:
 					newGrid[0]++;
