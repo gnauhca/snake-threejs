@@ -31,8 +31,8 @@ var Scene = Time.extend(function () {
 		/* camera */
 		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.x = 0;
-        this.camera.position.y = 0;
-        this.camera.position.z = 100;
+        this.camera.position.y = 100;
+        this.camera.position.z = 0;
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 		this.scene.add(this.camera);
 
@@ -52,6 +52,7 @@ var Scene = Time.extend(function () {
 		plane.position.x = 0;
 		plane.position.y = 0;
 		plane.position.z = 0;
+		plane.rotation.x = Math.PI * 0.5;
 		this.scene.add(plane);
 
 

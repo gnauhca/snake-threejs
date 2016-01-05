@@ -57,27 +57,27 @@ define(function(require, exports, module) {
 
 		this.constructor = function(_scene, options) {
 			this.super();
-			scene = _scene.scene;
-			w = _scene.gridWidth,
+			scene = _scene;
+			w = scene.gridWidth,
 			this.options = extend(true, {}, options);
 
-			this.sizeData = this.nextSizeData = [[0,0,1], [0,-1,1], [0,-2,1]];
+			this.sizeData = this.nextSizeData = [[0,0,1], [0,1,1], [0,2,1], [0,3,1], [0,4,1]];
 			this.nextSizeData = extend(true, [], this.sizeData);
 			this.head = this._createHead();
 			this.tail = this._createTail();
 
-			this.head.position.set(10, 10, 1);
-			this.head.rotation.z = -Math.PI/2;
+			this.head.rotation.x = Math.PI/2;
+			this.tail.rotation.x = Math.PI/2;
 
-			scene.add(this.head);
-			scene.add(this.tail);
+			scene.scene.add(this.head);
+			scene.scene.add(this.tail);
 
 			move();
 		}
 
 		this._createHead = function() {
 			//radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded
-			var headGem = new THREE.CylinderGeometry(0, w*0.4, w, 5, 1, false);
+			var headGem = new THREE.CylinderGeometry(0, w*0.4, w, 8, 1, false);
 			return createMesh(headGem);
 		}
 
@@ -118,26 +118,45 @@ define(function(require, exports, module) {
 					endAngle = 0;
 
 				// 点1 和 点3 的差
-				var t = [pos3[0]-pos1[0], pos3[1]-pos1[1]];
-				var aClockwise = false; // 顺逆时针
+				var t13 = [pos1[0]-pos3[0], pos1[1]-pos3[1]];
+				var t12 = [pos1[0]-pos2[0], pos1[1]-pos2[1]];
+				var aClockwise = false; // 顺逆时针┌ └ ┐ ┘
 
-				if (t[0] < 0 && t[1] > 0) {
-					// 左上 
-					endAngle = Math.PI;
-					aClockwise = true;
-				} else if (t[0] > 0 && t[1] > 0) {
-					// 右上
-					endAngle = 0;
+				if (t13[0] < 0 && t13[1] > 0 && t12[0] === 0) {
+					// 左上└
+					endAngle = 1.5*Math.PI;
 					aClockwise = false;
-				} else if (t[0] > 0 && t[1] < 0) {
-					// 右下
+				} else if (t13[0] < 0 && t13[1] > 0 && t12[1] === 0) {
+					// 左上 ┐
 					endAngle = 0;
 					aClockwise = true;
-				} else if (t[0] < 0 && t[1] < 0) {
-					// 左下
+				} else if (t13[0] > 0 && t13[1] > 0 && t12[0] === 0) {
+					// 右上 ┘
+					endAngle = 1.5*Math.PI;
+					aClockwise = true;
+				} else if (t13[0] > 0 && t13[1] > 0 && t12[1] === 0) {
+					// 右上 ┌
 					endAngle = Math.PI;
+					aClockwise = false;
+				} else if (t13[0] > 0 && t13[1] < 0 && t12[0] === 0) {
+					// 右下 ┐
+					endAngle = 0.5*Math.PI;
+					aClockwise = false;
+				} else if (t13[0] > 0 && t13[1] < 0 && t12[1] === 0) {
+					// 右下 └
+					endAngle = Math.PI;
+					aClockwise = true;
+				} else if (t13[0] < 0 && t13[1] < 0 && t12[0] === 0) {
+					// 左下 ┌
+					endAngle = 0.5*Math.PI;
+					aClockwise = true;
+				} else if (t13[0] < 0 && t13[1] < 0 && t12[1] === 0) {
+					// 左下 ┘
+					endAngle = 0;
 					aClockwise = false;
 				}
+
+
 				startAngle = endAngle + Math.PI*0.5*(aClockwise?1:-1)*percent;
 				//console.log(startAngle, endAngle);
 
@@ -184,16 +203,18 @@ define(function(require, exports, module) {
 			return drawGrid(prevLast, nowLast, nowPenult, 1 - this.percent).reverse();
 		}
 
+
+		
 		this._draw = function() {
 			var points = [];
 
-			scene.remove(this.body);
+			scene.scene.remove(this.body);
 
 			points = points.concat(this._drawFirst());
 			points = points.concat(this._drawBody());
 			points = points.concat(this._drawLast());
 			points = points.map(function(vec) {
-				return (new THREE.Vector3(vec.x, vec.y, 1));
+				return (new THREE.Vector3(vec.x, 1, vec.y));
 			});
 			//console.log(points);
             this.body = createMesh(new THREE.TubeGeometry(new THREE.SplineCurve3(points), 50, w*0.18, 8, false));
@@ -201,48 +222,71 @@ define(function(require, exports, module) {
             this._setHeadTailPos(this.head, points[0], points[1]);
             this._setHeadTailPos(this.tail, points[points.length-1], points[points.length-2]);
 
-            scene.add(this.body);
-            //console.log(this.sizeData);
-            //console.log(this.nextSizeData.toString());
+            scene.scene.add(this.body);
 		}
 
 		this._setHeadTailPos = function(mesh, point1, point2) {
-			var angle = Math.atan((point1.y-point2.y)/(point1.x-point2.x));
+			var angle = Math.atan((point1.z-point2.z)/(point1.x-point2.x));
 
-			if (point1.y <= point2.y && point1.x <= point2.x) {
-				angle += Math.PI;
-			} else if (point1.y >= point2.y && point1.x <= point2.x){
+			if (point1.x < point2.x) {
 				angle += Math.PI;
 			}
 
-			angle -= Math.PI/2;
+			angle -= 0.5 * Math.PI;
 
-			var scale = (0.5*w)/Math.sqrt((point1.x-point2.x)*(point1.x-point2.x)+(point1.y-point2.y)*(point1.y-point2.y));
+			var scale = (0.5*w)/Math.sqrt((point1.x-point2.x)*(point1.x-point2.x)+(point1.z-point2.z)*(point1.z-point2.z));
 
 			mesh.position.x = point1.x + (point1.x-point2.x)*scale;
-			mesh.position.y = point1.y + (point1.y-point2.y)*scale;
+			mesh.position.z = point1.z + (point1.z-point2.z)*scale;
 			mesh.rotation.z = angle;
-		}
+
+
+
+			if (mesh == this.head) {
+				var relativeCameraOffset = new THREE.Vector3(0, -50, -50);
+
+				var cameraOffset = relativeCameraOffset.applyMatrix4( this.head.matrixWorld );
+
+				scene.camera.position.x = cameraOffset.x;
+				scene.camera.position.y = cameraOffset.y;
+				scene.camera.position.z = cameraOffset.z;
+
+				scene.camera.lookAt(this.head.position);
+				//console.log(this.sizeData);
+				//console.log(this.nextSizeData.toString());
+
+			}
+ 		}
 		/* over 画蛇！！！！*/
 
+		that.a = 1;
+		document.addEventListener('keydown', function(e) {
+			if  (e.which == 37) {
+				that.a = (that.dir+1);
+			} else if (e.which == 39) {
+				that.a = (that.dir-1);
+			}
+		});
 
-		function move() {
+		time = 20;
+		function move() {time--
 
 			that.sizeData = that.nextSizeData;
+
+			that.setOrder(that.a);
 			that.setNextData();
 			that.nextSizeData.pop();
 
-			console.log(that.nextSizeData.toString())
+			//console.log(that.nextSizeData.toString())
 
 			that.percent = 0;
 
-			that.setOrder(that.dir+1)
 			var a = function() {
 				if (that.percent < 1) {
 					that.percent+=0.05;that._draw();
-					setTimeout(a, 100);					
-				} else {
-					//move();
+					setTimeout(a, 30);					
+				} else if (time > 0){
+					move();
 				}
 			};
 			a();
