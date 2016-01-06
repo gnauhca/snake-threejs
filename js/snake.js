@@ -22,13 +22,13 @@ hit();
 function createMesh(geom) {
 
     // assign two materials
-    var meshMaterial = new THREE.MeshNormalMaterial();
+    var meshMaterial = new THREE.MeshLambertMaterial();
     meshMaterial.side = THREE.DoubleSide;
     var wireFrameMat = new THREE.MeshBasicMaterial();
     wireFrameMat.wireframe = true;
 
     // create a multimaterial
-    var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial, wireFrameMat]);
+    var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial/*, wireFrameMat*/]);
 
     return mesh;
 }
@@ -66,8 +66,12 @@ define(function(require, exports, module) {
 			this.head = this._createHead();
 			this.tail = this._createTail();
 
+			this.head.position.y = 1;
+			this.tail.position.y = 1;
 			this.head.rotation.x = Math.PI/2;
 			this.tail.rotation.x = Math.PI/2;
+			this.head.castShadow = true;
+			this.tail.castShadow = true;
 
 			scene.scene.add(this.head);
 			scene.scene.add(this.tail);
@@ -77,12 +81,12 @@ define(function(require, exports, module) {
 
 		this._createHead = function() {
 			//radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded
-			var headGem = new THREE.CylinderGeometry(0, w*0.4, w, 8, 1, false);
+			var headGem = new THREE.CylinderGeometry(0, w*0.4, w, 4, 1, false);
 			return createMesh(headGem);
 		}
 
 		this._createTail = function() {
-			var headGem = new THREE.CylinderGeometry(0, w*0.18, w, 8, 1, false);
+			var headGem = new THREE.CylinderGeometry(0, w*0.18, w, 6, 1, false);
 			return createMesh(headGem);
 		}
 
@@ -217,7 +221,8 @@ define(function(require, exports, module) {
 				return (new THREE.Vector3(vec.x, 1, vec.y));
 			});
 			//console.log(points);
-            this.body = createMesh(new THREE.TubeGeometry(new THREE.SplineCurve3(points), 50, w*0.18, 8, false));
+            this.body = createMesh(new THREE.TubeGeometry(new THREE.SplineCurve3(points), 50, w*0.18, 6, false));
+            this.body.castShadow = true;
 
             this._setHeadTailPos(this.head, points[0], points[1]);
             this._setHeadTailPos(this.tail, points[points.length-1], points[points.length-2]);
@@ -243,7 +248,7 @@ define(function(require, exports, module) {
 
 
 			if (mesh == this.head) {
-				var relativeCameraOffset = new THREE.Vector3(0, -50, -50);
+				var relativeCameraOffset = new THREE.Vector3(0, -100, -100);
 
 				var cameraOffset = relativeCameraOffset.applyMatrix4( this.head.matrixWorld );
 
@@ -254,7 +259,8 @@ define(function(require, exports, module) {
 				scene.camera.lookAt(this.head.position);
 				//console.log(this.sizeData);
 				//console.log(this.nextSizeData.toString());
-
+				scene.spotLight.target = this.head;
+				//scene.spotLight.position.set(this.head.position.x,60,this.head.position.z);
 			}
  		}
 		/* over 画蛇！！！！*/
@@ -268,7 +274,7 @@ define(function(require, exports, module) {
 			}
 		});
 
-		time = 20;
+		time = 50;
 		function move() {time--
 
 			that.sizeData = that.nextSizeData;
@@ -283,7 +289,7 @@ define(function(require, exports, module) {
 
 			var a = function() {
 				if (that.percent < 1) {
-					that.percent+=0.05;that._draw();
+					that.percent+=0.1;that._draw();
 					setTimeout(a, 30);					
 				} else if (time > 0){
 					move();
