@@ -32,6 +32,29 @@ function createMesh(geom) {
 
     return mesh;
 }
+var drawSphereByPoints = (function() {
+	var spheres = [],
+		radius = 1.5,
+		seg = 8;
+
+	return function(points) {
+		var meshs = [],
+			mesh;
+
+		points.forEach(function(point, i) {
+			if (spheres[i]) {
+				mesh = spheres[i];
+			} else {
+				mesh = createMesh(new THREE.SphereGeometry(radius, seg, seg));
+				spheres.push(mesh);
+			}
+			mesh.position.set(point.x, point.y, point.z);
+			meshs.push(mesh);
+		});
+		return meshs;
+	}	
+})();
+
 
 /*function pos(sizeStr) {
 	var i = sizeStr.split('').map(function(i) {return parseInt(i)});
@@ -48,12 +71,12 @@ define(function(require, exports, module) {
 
 		this.head;
 		this.tail;
-		this.body; //shape
+		this.bodys=[]; //shape
 		this.sizeData;//[x,z,正反面1for正]
 		this.nextSizeData;
 		this.dir = 0; //0 - 3 -> 上 - 左 上为y轴正方向
 		this.percent;
-		this.segment = 20;// 一个格子分为10段
+		this.segment = 10;// 一个格子分为10段
 
 		this.constructor = function(_scene, options) {
 			this.super();
@@ -200,10 +223,10 @@ define(function(require, exports, module) {
 
 			// 如果两次长度不一
 			if (l !== sl) {
-				prevLast = (nowLast[0] + (nowLast[0]-nowPenult[0])) + '' + 
-							(nowLast[1] + (nowLast[1]-nowPenult[1])) + '' + 1;
+				prevLast = [nowLast[0] + (nowLast[0]-nowPenult[0]), 
+							nowLast[1] + (nowLast[1]-nowPenult[1]), 1];
 			}
- 
+ 			console.log(prevLast, nowLast, nowPenult);
 			return drawGrid(prevLast, nowLast, nowPenult, 1 - this.percent).reverse();
 		}
 
@@ -212,7 +235,9 @@ define(function(require, exports, module) {
 		this._draw = function() {
 			var points = [];
 
-			scene.scene.remove(this.body);
+			this.bodys.forEach(function(sphere) {
+				scene.scene.remove(sphere);
+			});
 
 			points = points.concat(this._drawFirst());
 			points = points.concat(this._drawBody());
@@ -221,13 +246,16 @@ define(function(require, exports, module) {
 				return (new THREE.Vector3(vec.x, 1, vec.y));
 			});
 			//console.log(points);
-            this.body = createMesh(new THREE.TubeGeometry(new THREE.SplineCurve3(points), 50, w*0.18, 6, false));
-            this.body.castShadow = true;
+            this.bodys = drawSphereByPoints(points);
+
+            this.bodys.castShadow = true;
 
             this._setHeadTailPos(this.head, points[0], points[1]);
             this._setHeadTailPos(this.tail, points[points.length-1], points[points.length-2]);
 
-            scene.scene.add(this.body);
+            this.bodys.forEach(function(sphere) {
+				scene.scene.add(sphere);
+			});
 		}
 
 		this._setHeadTailPos = function(mesh, point1, point2) {
@@ -274,7 +302,7 @@ define(function(require, exports, module) {
 			}
 		});
 
-		time = 50;
+		time = 100;
 		function move() {time--
 
 			that.sizeData = that.nextSizeData;
