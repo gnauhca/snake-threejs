@@ -74,7 +74,7 @@ define(function(require, exports, module) {
 		this.bodys=[]; //shape
 		this.sizeData;//[x,z,正反面1for正]
 		this.nextSizeData;
-		this.dir = 0; //0 - 3 -> 上 - 左 上为y轴正方向
+		this.dir = 2; //0 - 3 -> 上 - 左 上为y轴正方向
 		this.percent;
 		this.segment = 10;// 一个格子分为10段
 
@@ -185,7 +185,6 @@ define(function(require, exports, module) {
 
 
 				startAngle = endAngle + Math.PI*0.5*(aClockwise?1:-1)*percent;
-				//console.log(startAngle, endAngle);
 
 				curve = new THREE.EllipseCurve(
 					center[0]*w,  center[1]*w,            // ax, aY
@@ -194,7 +193,6 @@ define(function(require, exports, module) {
 					aClockwise,            // aClockwise
 					0                 // aRotation 
 				);
-				//console.log(percent)
 			}
 			return curve.getPoints(parseInt(that.segment * percent));
 		}
@@ -226,10 +224,9 @@ define(function(require, exports, module) {
 				prevLast = [nowLast[0] + (nowLast[0]-nowPenult[0]), 
 							nowLast[1] + (nowLast[1]-nowPenult[1]), 1];
 			}
- 			console.log(prevLast, nowLast, nowPenult);
-			return drawGrid(prevLast, nowLast, nowPenult, 1 - this.percent).reverse();
-		}
 
+			return drawGrid(prevLast, nowLast, nowPenult, 1.001 - this.percent).reverse();
+		}
 
 		
 		this._draw = function() {
@@ -245,9 +242,8 @@ define(function(require, exports, module) {
 			points = points.map(function(vec) {
 				return (new THREE.Vector3(vec.x, 1, vec.y));
 			});
-			//console.log(points);
-            this.bodys = drawSphereByPoints(points);
 
+            this.bodys = drawSphereByPoints(points);
             this.bodys.castShadow = true;
 
             this._setHeadTailPos(this.head, points[0], points[1]);
@@ -274,7 +270,7 @@ define(function(require, exports, module) {
 			mesh.rotation.z = angle;
 
 
-
+			//camera
 			if (mesh == this.head) {
 				var relativeCameraOffset = new THREE.Vector3(0, -100, -100);
 
@@ -285,15 +281,12 @@ define(function(require, exports, module) {
 				scene.camera.position.z = cameraOffset.z;
 
 				scene.camera.lookAt(this.head.position);
-				//console.log(this.sizeData);
-				//console.log(this.nextSizeData.toString());
 				scene.spotLight.target = this.head;
-				//scene.spotLight.position.set(this.head.position.x,60,this.head.position.z);
 			}
  		}
 		/* over 画蛇！！！！*/
 
-		that.a = 1;
+		that.a = 2;
 		document.addEventListener('keydown', function(e) {
 			if  (e.which == 37) {
 				that.a = (that.dir+1);
@@ -302,7 +295,7 @@ define(function(require, exports, module) {
 			}
 		});
 
-		time = 100;
+		time = 50;
 		function move() {time--
 
 			that.sizeData = that.nextSizeData;
@@ -317,7 +310,9 @@ define(function(require, exports, module) {
 
 			var a = function() {
 				if (that.percent < 1) {
-					that.percent+=0.1;that._draw();
+					that.percent+=0.1; 
+					that.percent = (that.percent >= 1 ? 1 : that.percent);
+					that._draw();
 					setTimeout(a, 30);					
 				} else if (time > 0){
 					move();
@@ -369,10 +364,6 @@ define(function(require, exports, module) {
 			this.nextSizeData.unshift(newGrid);	
 		}
 	});
-
-
-
-
 
 
 	module.exports = Snake;
