@@ -195,8 +195,8 @@ var Snake = Life.extend(function() {
 	this.head;
 	this.tail;
 	this.bodys=[]; //shape
-	this.sizeData;//[x,z,正反面1for正]
-	this.nextSizeData;
+	this.preSizeData;//[x,z,正反面1for正]
+	this.sizeData;
 	this.dir = 2; //0 - 3 -> 上 - 左 上为y轴正方向
 	this.nextDir = 2; 
 	this.options = {};
@@ -206,7 +206,7 @@ var Snake = Life.extend(function() {
 		scene = _scene;
 		w = scene.gridWidth,//单位
 
-		this.nextSizeData = extend(true, [], this.sizeData);
+		this.sizeData = extend(true, [], this.preSizeData);
 		this.head = createHead();
 		this.tail = createTail();
 
@@ -214,8 +214,6 @@ var Snake = Life.extend(function() {
 		this.tail.position.y = w;
 		this.head.rotation.x = Math.PI/2;
 		this.tail.rotation.x = Math.PI/2;
-		this.head.castShadow = true;
-		this.tail.castShadow = true;
 
 		scene.scene.add(this.head);
 		scene.scene.add(this.tail);
@@ -251,12 +249,12 @@ var Snake = Life.extend(function() {
 	 * 每个关卡开始时候由game 调用 game会相应传入snake的关卡配置
 	 */
 	this.setUp = function(snakeOptions) {
-		this.sizeData = this.nextSizeData = [[0,0,1], [0,1,1], [0,2,1], [0,3,1], [0,4,1]];
+		this.preSizeData = this.sizeData = [[0,0,1], [0,1,1], [0,2,1], [0,3,1], [0,4,1]];
 		this.options = extend(true, {}, snakeOptions);
 	}
 
 	this.start = function() {
-		move();
+		move(); 
 	}
 
 
@@ -267,7 +265,7 @@ var Snake = Life.extend(function() {
 
 		// 从坐标获得平滑线条的点信息
 		var points = [];
-		points = getLinePoint(this.nextSizeData, percent, w);
+		points = getLinePoint(this.sizeData, percent, w);
 		points = points.map(function(vec) {
 			return (new THREE.Vector3(vec.x, w, vec.y));
 		});
@@ -318,17 +316,18 @@ var Snake = Life.extend(function() {
 	/* over 画蛇！！！！*/
 
 	time = 50;//for test
-	function move() {time--
+	function move() {time--; 
 
-		that.sizeData = that.nextSizeData;
+		that.preSizeData = that.sizeData;
 
 		that.setDir(that.nextDir);
 		that.setNextData();
-		that.nextSizeData.pop();
+		that.sizeData.pop();
+
 
 		// todo 判断碰撞
 
-		console.log(time)
+		//console.log(time)
 		if (time > 0)
 		that.addTween({'percent': 0}, {'percent': 1}, that.options.speed, function(current) {
 			that._draw(current.percent);
@@ -346,9 +345,9 @@ var Snake = Life.extend(function() {
 
 	// 计算下一步位置信息，此方法只unshift 一个位置，而不删除尾部最后位置（考虑到会吃到食物的情况）
 	this.setNextData = function() {
-		this.nextSizeData = extend(true, [], this.sizeData);
+		this.sizeData = extend(true, [], this.preSizeData);
 
-		var newGrid = extend(true, [], this.nextSizeData[0]);
+		var newGrid = extend(true, [], this.sizeData[0]);
 		switch (this.dir) {
 			case 0:
 				newGrid[1]++;
@@ -362,7 +361,7 @@ var Snake = Life.extend(function() {
 			case 3:
 				newGrid[0]--;
 		}
-		this.nextSizeData.unshift(newGrid);	
+		this.sizeData.unshift(newGrid);	
 	}
 });
 

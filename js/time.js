@@ -67,7 +67,7 @@ var TimeBody = Class.extend(function TimeBody() {
 	/**
 	 * 该物体灭亡
 	 */
-	this.die = function() {
+	this.destory = function() {
 		TIME.removeBody(this);
 	}
 

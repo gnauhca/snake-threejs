@@ -52,13 +52,13 @@ var Scene = Time.extend(function () {
         spotLight.shadowCameraNear = 2;
         spotLight.shadowCameraFar = 500;
         spotLight.shadowCameraFov = 80;
-        spotLight.shadowCameraVisible = true;
-	    spotLight.intensity = 0;
-	    spotLight.position.set(0,0, 300);
+        spotLight.shadowCameraVisible = true;    
+		spotLight.intensity = 1;
+	    spotLight.position.set(0,300, -300);
 	    spotLight.angle = 1.3;
 
         this.spotLight = spotLight;
-	    this.scene.add(this.spotLight);/**/
+	    this.scene.add(this.spotLight);
 
 
 
@@ -78,12 +78,13 @@ var Scene = Time.extend(function () {
         directionalLight.shadowMapHeight = 1024;
         directionalLight.shadowMapWidth = 1024;
 
-        this.scene.add(directionalLight);
+        //this.scene.add(directionalLight);
+
 
 
 		// create the ground plane
-		var planeGeometry = new THREE.PlaneGeometry(1000, 1000, 100, 100);
-		var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff/*, wireframe: true*/});
+		var planeGeometry = new THREE.PlaneGeometry(this.width, this.height, this.width/this.gridWidth, this.height/this.gridWidth);
+		var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, wireframe: true});
 		var plane = new THREE.Mesh(planeGeometry, planeMaterial);
 		plane.receiveShadow = true;
 
