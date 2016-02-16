@@ -50,7 +50,7 @@ var Scene = Time.extend(function () {
 		var spotLight = new THREE.SpotLight('#ffffff');
 		spotLight.castShadow = true;
         spotLight.shadowCameraNear = 2;
-        spotLight.shadowCameraFar = 1000;
+        spotLight.shadowCameraFar = 500;
         spotLight.shadowCameraFov = 80;
         spotLight.shadowCameraVisible = true;
 	    spotLight.intensity = 0;
@@ -83,7 +83,7 @@ var Scene = Time.extend(function () {
 
 		// create the ground plane
 		var planeGeometry = new THREE.PlaneGeometry(1000, 1000, 100, 100);
-		var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, wireframe: true});
+		var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff/*, wireframe: true*/});
 		var plane = new THREE.Mesh(planeGeometry, planeMaterial);
 		plane.receiveShadow = true;
 

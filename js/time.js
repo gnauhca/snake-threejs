@@ -83,11 +83,17 @@ var TimeBody = Class.extend(function TimeBody() {
 	}
 
 	this.removeFrameTask = function(frameTask) {
+		if (!frameTask) {
+			// remove all
+			this.frameTasks = [];
+			return;
+		}
+
 		var index = this.bodys.indexOf(frameTasks);
 
 		if (index !== -1) {
 			this.frameTasks.splice(index, 1);
-		}		
+		}
 	}
 
 	/** 
@@ -100,12 +106,18 @@ var TimeBody = Class.extend(function TimeBody() {
 		}).onComplete(function() {
 			that.removeTween(tween);
 			endFn();
-		});
+		}).start();
 
 		this.tweens.push(tween);
 	}
 
 	this.removeTween = function(tween) {
+		if (!tween) {
+			// remove all
+			this.tween = [];
+			return;
+		}
+
 		var index = this.tweens.indexOf(tween);
 
 		if (index !== -1) {
