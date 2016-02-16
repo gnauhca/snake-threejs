@@ -15,48 +15,37 @@
 
 
 define(function(require, exports, module) {
-	var TimeBody = require('time');
+	var Time = require('time');
 	var Scene = require('scene');
 	var Snake = require('snake');
 
-	var Game = TimeBody.extend(function(gameData) {
+	var Game = Time.extend(function(gameData) {
 		var score;
 		var gameData = extend(true, {
-			speed: 2000, //蛇的速度
+			speed: 500, //蛇的速度
 			mapInfo: {},
 			blocks: {},//障碍
 			time: 120,//总时间限制
 			score: 2000 //需要得几分过关
 		}, gameData);
 
-		this.timeThings = [];
 		//this.gameUI;
 		this.scene = new Scene(document.getElementById('renderDom'));
+		this.snake = new Snake(this.scene);
 
 		this.init = function() {
-			console.log('init');
-			var snake = new Snake(this.scene, {
-				speed: gameData.speed
-			});
-			this.timeThings.push(snake);
-			//snake._draw();
-			TIME.start();
 			this.start();
-
 		}
 
 		this.start = function() {
-			this.timeThings.forEach(function(timeThing) {
-				if (typeof timeThing.wake === 'function')
-				timeThing.wake();
-			});			
+
+			this.snake.setUp({speed: gameData.speed});
+			this.snake.start();
+			TIME.start();
 		}
 
 		this.pause = function() {
-			this.timeThings.forEach(function(timeThing) {
-				if (typeof timeThing.sleep === 'function')
-				timeThing.sleep();
-			});
+			TIME.stop();
 		}
 
 
