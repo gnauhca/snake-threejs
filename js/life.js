@@ -5,6 +5,8 @@ var hitCalculator = (function() {
 
 
 	hitCalculator.prototype.addLife = function(life) {
+
+
 		this.lifes.push(life);
 		return life;
 	}
@@ -12,11 +14,11 @@ var hitCalculator = (function() {
 	hitCalculator.prototype.removeLife = function(life) {
 		if (!life) {
 			// remove all
-			this.lifes = [];
+			this.lifes.length = 0;
 			return;
 		}
 
-		var index = this.bodys.indexOf(lifes);
+		var index = this.lifes.indexOf(life);
 
 		if (index !== -1) {
 			this.lifes.splice(index, 1);
@@ -24,6 +26,7 @@ var hitCalculator = (function() {
 	}
 
 	hitCalculator.prototype.calculate = function() {
+		var that = this;
 		var lifes = this.lifes;
 
 		// 循环判断物体之间是否位置有重叠
@@ -31,9 +34,9 @@ var hitCalculator = (function() {
 			j = i+1; 
 			for (;j < this.lifes.length; j++) {
 				isHit = this.lifes[i].sizeData.some(function(aCrood) {
-					for (var k; k < this.lifes[j].length; k++) {
-						if (aCrood[0] === this.lifes[j][k][0] &&
-							aCrood[1] === this.lifes[j][k][1]) {
+					for (var k=0; k < that.lifes[j].sizeData.length; k++) {
+						if (aCrood[0] === that.lifes[j].sizeData[k][0] &&
+							aCrood[1] === that.lifes[j].sizeData[k][1]) {
 							return true;
 						}
 					}
@@ -46,7 +49,7 @@ var hitCalculator = (function() {
 		}
 	}
 
-	return new hitCul();
+	return new hitCalculator();
 })();
 
 
@@ -59,14 +62,20 @@ define(function(require, exports, module) {
 
 		this.constructor = function() {
 			this.super();
+			hitCalculator.addLife(this);
 		}
 
 		this.destory = function() {
+			hitCalculator.removeLife(this);
 			this.super.destory();
 		}
 
 		this.handleHit = function(effect) {
 
+		}
+
+		this.triggerHitCalculator = function() {
+			hitCalculator.calculate();
 		}
 	});
 

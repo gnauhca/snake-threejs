@@ -9,9 +9,9 @@ var Scene = Time.extend(function () {
 	var that = this,
 		elem;
 
-	this.width = 100;
-	this.height = 100;
-	this.gridWidth = 10;
+	this.width = 200;
+	this.height = 200;
+	this.gridWidth = 5;
 
 	this.constructor = function(_elem) {
 		this.super();
@@ -58,7 +58,7 @@ var Scene = Time.extend(function () {
 	    spotLight.angle = 1.3;
 
         this.spotLight = spotLight;
-	    this.scene.add(this.spotLight);
+	    //this.scene.add(this.spotLight);
 
 
 
@@ -74,11 +74,29 @@ var Scene = Time.extend(function () {
         directionalLight.shadowCameraBottom = -1000;
 
         directionalLight.distance = 0;
+        directionalLight.intensity = 0.8;
+        directionalLight.shadowMapHeight = 1024;
+        directionalLight.shadowMapWidth = 1024;
+
+        this.scene.add(directionalLight);
+
+        var pointColor = "#ffffff";
+        var directionalLight = new THREE.DirectionalLight(pointColor);
+        directionalLight.position.set(40, 160, 10);
+        directionalLight.castShadow = true;
+        directionalLight.shadowCameraNear = 2;
+        directionalLight.shadowCameraFar = 200;
+        directionalLight.shadowCameraLeft = -1000;
+        directionalLight.shadowCameraRight = 1000;
+        directionalLight.shadowCameraTop = 1000;
+        directionalLight.shadowCameraBottom = -1000;
+
+        directionalLight.distance = 0;
         directionalLight.intensity = 0.5;
         directionalLight.shadowMapHeight = 1024;
         directionalLight.shadowMapWidth = 1024;
 
-        //this.scene.add(directionalLight);
+        this.scene.add(directionalLight);
 
 
 
@@ -96,7 +114,7 @@ var Scene = Time.extend(function () {
 		this.scene.add(plane);
 
 
-		var frameTask = this.addFrameTask(function(fn) {
+		var frameTask = this.addFrameTask(function() {
 			webGLRenderer.render(that.scene, that.camera);
 		});
 	}

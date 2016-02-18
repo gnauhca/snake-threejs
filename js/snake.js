@@ -20,26 +20,12 @@ hit();
 */
 define(function(require, exports, module) {
 
-function createMesh(geom) {
-
-    // assign two materials
-    var meshMaterial = new THREE.MeshLambertMaterial();
-    meshMaterial.side = THREE.DoubleSide;
-    var wireFrameMat = new THREE.MeshBasicMaterial();
-    wireFrameMat.wireframe = true;
-
-    // create a multimaterial
-    var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial/*, wireFrameMat*/]);
-    mesh.castShadow = true;
-
-    return mesh;
-}
 var drawSphereByPoints = (function() {
 	var spheres = [],
-		radius = 1.5,
+		radius = 0.15,
 		seg = 8;
 
-	return function(points) {
+	return function(points, w) {
 		var meshs = [],
 			mesh;
 
@@ -47,7 +33,7 @@ var drawSphereByPoints = (function() {
 			if (spheres[i]) {
 				mesh = spheres[i];
 			} else {
-				mesh = createMesh(new THREE.SphereGeometry(radius, seg, seg));
+				mesh = createMesh(new THREE.SphereGeometry(radius*w, seg, seg), 0xabcdef);
 				spheres.push(mesh);
 			}
 			mesh.position.set(point.x, point.y, point.z);
@@ -200,6 +186,7 @@ var Snake = Life.extend(function() {
 	this.dir = 2; //0 - 3 -> 上 - 左 上为y轴正方向
 	this.nextDir = 2; 
 	this.options = {};
+	
 
 	this.constructor = function(_scene) {
 		this.super();
@@ -223,12 +210,12 @@ var Snake = Life.extend(function() {
 		function createHead() {
 			//radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded
 			var headGem = new THREE.CylinderGeometry(0, w*0.4, w, 4, 1, false);
-			return createMesh(headGem);
+			return createMesh(headGem, 0xabcdef);
 		}
 
 		function createTail() {
 			var headGem = new THREE.CylinderGeometry(0, w*0.18, w, 6, 1, false);
-			return createMesh(headGem);
+			return createMesh(headGem, 0xabcdef);
 		}
 	}
 
@@ -238,6 +225,7 @@ var Snake = Life.extend(function() {
 	 */
 	function initEvent() {
 		document.addEventListener('keydown', function(e) {
+			e.preventDefault();
 			if  (e.which == 37) {
 				that.nextDir = (that.dir+1);
 			} else if (e.which == 39) {
@@ -257,6 +245,11 @@ var Snake = Life.extend(function() {
 		move(); 
 	}
 
+	//游戏退出时候由game对象通知
+	this.exit = function() {
+		
+	}
+
 
 	/* 画蛇！！！！*/
 
@@ -273,7 +266,7 @@ var Snake = Life.extend(function() {
 		this.bodys.forEach(function(sphere) {
 			scene.scene.remove(sphere);
 		});
-        this.bodys = drawSphereByPoints(points);
+        this.bodys = drawSphereByPoints(points, w);
         this.bodys.forEach(function(sphere) {
 			scene.scene.add(sphere);
 		});
@@ -301,7 +294,7 @@ var Snake = Life.extend(function() {
 
 		//camera
 		if (mesh == this.head) {
-			var relativeCameraOffset = new THREE.Vector3(0, -80, -100);
+			var relativeCameraOffset = new THREE.Vector3(0, -50, -30);
 
 			var cameraOffset = relativeCameraOffset.applyMatrix4( this.head.matrixWorld );
 
@@ -315,7 +308,7 @@ var Snake = Life.extend(function() {
 	}
 	/* over 画蛇！！！！*/
 
-	time = 50;//for test
+	time = 100;//for test
 	function move() {time--; 
 
 		that.preSizeData = that.sizeData;
@@ -323,7 +316,7 @@ var Snake = Life.extend(function() {
 		that.setDir(that.nextDir);
 		that.setNextData();
 		that.sizeData.pop();
-
+		that.triggerHitCalculator();
 
 		// todo 判断碰撞
 
