@@ -43,7 +43,7 @@ var FoodHandler = Class.extend(function() {
 			
 			//console.log(foodData)
 			if (foodData.order === this.currentOrder) {
-				food = foodFactory.getFood(this.scene, foodData.type, foodData, function(food) {that.handleFoodDestory(food)});
+				food = foodFactory.getFood(this.scene, foodData.type, foodData, function(_food) {that.handleFoodDestory(_food)});
 				if (foodData.orderRequired) {
 					this.orderFoods.push(food);
 				} else {

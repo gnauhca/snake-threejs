@@ -66,8 +66,11 @@ define(function(require, exports, module) {
 		}
 
 		this.destory = function() {
-			hitCalculator.removeLife(this);
 			this.super.destory();
+		}
+
+		this.die = function() {
+			hitCalculator.removeLife(this);
 		}
 
 		this.handleHit = function(effect) {

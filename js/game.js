@@ -19,7 +19,7 @@ var snakeData = {speed: 300}
 var foodDatas = [
 
 {
-	size: [5,5],
+	size: [0,-5],
 	type: 'normal',
 	color: 0xff0000,
 	order: 0,

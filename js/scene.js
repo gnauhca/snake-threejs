@@ -9,9 +9,8 @@ var Scene = Time.extend(function () {
 	var that = this,
 		elem;
 
-	this.width = 200;
-	this.height = 200;
-	this.gridWidth = 5;
+	this.width = 100;
+	this.height = 100;
 
 	this.constructor = function(_elem) {
 		this.super();
@@ -21,7 +20,7 @@ var Scene = Time.extend(function () {
 	this.initializer = function() {
 		/* render */
 		var webGLRenderer = new THREE.WebGLRenderer();
-		webGLRenderer.setClearColor(new THREE.Color(0x000, 1.0));
+		webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
 		webGLRenderer.setSize(window.innerWidth, window.innerHeight);
 		webGLRenderer.shadowMapEnabled = true;
 		elem.appendChild(webGLRenderer.domElement);
@@ -32,12 +31,25 @@ var Scene = Time.extend(function () {
         this.scene.add(axes);
 
 		/* camera */
-		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
         this.camera.position.x = 0;
-        this.camera.position.y = 100;
+        this.camera.position.y = 30;
         this.camera.position.z = 0;
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 		this.scene.add(this.camera);
+
+
+		/*var cube = new THREE.CubeGeometry(2,2,2);
+		var cubeMeterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+		var cubeMesh = new THREE.Mesh(cube,cubeMeterial);
+
+		cubeMesh.position.set(0,2,0);
+
+		cubeMesh.castShadow = true;
+
+		this.scene.add(cubeMesh);
+		this.camera.position.set(5,5,5);
+		this.camera.lookAt(new THREE.Vector3(0, 0, 0));*/
 
 		/* light */
 
@@ -50,11 +62,11 @@ var Scene = Time.extend(function () {
 		var spotLight = new THREE.SpotLight('#ffffff');
 		spotLight.castShadow = true;
         spotLight.shadowCameraNear = 2;
-        spotLight.shadowCameraFar = 500;
-        spotLight.shadowCameraFov = 80;
+        spotLight.shadowCameraFar = 100;
+        spotLight.shadowCameraFov = 20;
         spotLight.shadowCameraVisible = true;    
-		spotLight.intensity = 1;
-	    spotLight.position.set(0,300, -300);
+		spotLight.intensity = 0.8;
+	    spotLight.position.set(0, 10, -00);
 	    spotLight.angle = 1.3;
 
         this.spotLight = spotLight;
@@ -64,44 +76,30 @@ var Scene = Time.extend(function () {
 
         var pointColor = "#ffffff";
         var directionalLight = new THREE.DirectionalLight(pointColor);
-        directionalLight.position.set(-40, 160, -10);
+        var lightTarget = new THREE.Object3D();
+        lightTarget.position = new THREE.Vector3(0,0,0);
+        //directionalLight.shadowCameraVisible = true;
         directionalLight.castShadow = true;
-        directionalLight.shadowCameraNear = 2;
-        directionalLight.shadowCameraFar = 200;
-        directionalLight.shadowCameraLeft = -1000;
-        directionalLight.shadowCameraRight = 1000;
-        directionalLight.shadowCameraTop = 1000;
-        directionalLight.shadowCameraBottom = -1000;
-
-        directionalLight.distance = 0;
-        directionalLight.intensity = 0.8;
-        directionalLight.shadowMapHeight = 1024;
-        directionalLight.shadowMapWidth = 1024;
-
-        this.scene.add(directionalLight);
-
-        var pointColor = "#ffffff";
-        var directionalLight = new THREE.DirectionalLight(pointColor);
-        directionalLight.position.set(40, 160, 10);
-        directionalLight.castShadow = true;
-        directionalLight.shadowCameraNear = 2;
-        directionalLight.shadowCameraFar = 200;
-        directionalLight.shadowCameraLeft = -1000;
-        directionalLight.shadowCameraRight = 1000;
-        directionalLight.shadowCameraTop = 1000;
-        directionalLight.shadowCameraBottom = -1000;
-
-        directionalLight.distance = 0;
         directionalLight.intensity = 0.5;
-        directionalLight.shadowMapHeight = 1024;
-        directionalLight.shadowMapWidth = 1024;
+        directionalLight.position.set(5, 5, 5);
+        directionalLight.shadowCameraNear = 0;
+        directionalLight.shadowCameraFar = 10; 
+        directionalLight.shadowCameraLeft = -10;
+        directionalLight.shadowCameraRight = 10;
+        directionalLight.shadowCameraTop = 10;
+        directionalLight.shadowCameraBottom = -10;
 
+        directionalLight.shadowMapHeight = 500;
+        directionalLight.shadowMapWidth = 500;
+        //directionalLight.target = lightTarget;
+
+        this.directionalLight = directionalLight;
         this.scene.add(directionalLight);
 
 
 
 		// create the ground plane
-		var planeGeometry = new THREE.PlaneGeometry(this.width, this.height, this.width/this.gridWidth, this.height/this.gridWidth);
+		var planeGeometry = new THREE.PlaneGeometry(this.width, this.height, this.width, this.height);
 		var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, wireframe: true});
 		var plane = new THREE.Mesh(planeGeometry, planeMaterial);
 		plane.receiveShadow = true;
@@ -113,7 +111,7 @@ var Scene = Time.extend(function () {
 		plane.rotation.x = -Math.PI * 0.5;
 		this.scene.add(plane);
 
-
+		webGLRenderer.render(that.scene, that.camera);
 		var frameTask = this.addFrameTask(function() {
 			webGLRenderer.render(that.scene, that.camera);
 		});

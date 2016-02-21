@@ -25,7 +25,7 @@ var drawSphereByPoints = (function() {
 		radius = 0.15,
 		seg = 8;
 
-	return function(points, w) {
+	return function(points) {
 		var meshs = [],
 			mesh;
 
@@ -33,7 +33,7 @@ var drawSphereByPoints = (function() {
 			if (spheres[i]) {
 				mesh = spheres[i];
 			} else {
-				mesh = createMesh(new THREE.SphereGeometry(radius*w, seg, seg), 0xabcdef);
+				mesh = createMesh(new THREE.SphereGeometry(radius, seg, seg), 0xabcdef);
 				spheres.push(mesh);
 			}
 			mesh.position.set(point.x, point.y, point.z);
@@ -46,8 +46,7 @@ var drawSphereByPoints = (function() {
 
 var getLinePoint = (function() {
 	var croodPoints = [],
-		percent,
-		w, //单位
+		percent, //单位
 		segment = 10;
 
 	function drawGrid(prev, now, next, percent) {
@@ -64,10 +63,10 @@ var getLinePoint = (function() {
 			// 画直线
 			curve = new THREE.LineCurve(
 							new THREE.Vector2(
-								(endPoint2[0] + (endPoint1[0]-endPoint2[0])*percent) * w, 
-								(endPoint2[1] + (endPoint1[1]-endPoint2[1])*percent) * w
+								(endPoint2[0] + (endPoint1[0]-endPoint2[0])*percent), 
+								(endPoint2[1] + (endPoint1[1]-endPoint2[1])*percent)
 							),
-							new THREE.Vector2(endPoint2[0] * w, endPoint2[1] * w)
+							new THREE.Vector2(endPoint2[0], endPoint2[1])
 						);
 
 		} else {
@@ -121,8 +120,8 @@ var getLinePoint = (function() {
 			startAngle = endAngle + Math.PI*0.5*(aClockwise?1:-1)*percent;
 
 			curve = new THREE.EllipseCurve(
-				center[0]*w,  center[1]*w,            // ax, aY
-				w/2, w/2,           // xRadius, yRadius
+				center[0],  center[1],            // ax, aY
+				0.5, 0.5,           // xRadius, yRadius
 				startAngle,  endAngle,  // aStartAngle, aEndAngle
 				aClockwise,            // aClockwise
 				0                 // aRotation 
@@ -151,10 +150,9 @@ var getLinePoint = (function() {
 	}
 
 
-	return (function draw(_croodPoints, _percent, _w) {
+	return (function draw(_croodPoints, _percent) {
 		croodPoints = _croodPoints;
 		percent = _percent;
-		w = _w;
 
 		var points = [];
 		points = points.concat(drawFirst());
@@ -174,8 +172,7 @@ var getLinePoint = (function() {
 var Life = require('life');
 var Snake = Life.extend(function() {
 
-	var w,
-		that = this,
+	var that = this,
 		scene;
 
 	this.head;
@@ -191,14 +188,13 @@ var Snake = Life.extend(function() {
 	this.constructor = function(_scene) {
 		this.super();
 		scene = _scene;
-		w = scene.gridWidth,//单位
 
 		this.sizeData = extend(true, [], this.preSizeData);
 		this.head = createHead();
 		this.tail = createTail();
 
-		this.head.position.y = w;
-		this.tail.position.y = w;
+		this.head.position.y = 0;
+		this.tail.position.y = 0;
 		this.head.rotation.x = Math.PI/2;
 		this.tail.rotation.x = Math.PI/2;
 
@@ -209,12 +205,12 @@ var Snake = Life.extend(function() {
 
 		function createHead() {
 			//radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded
-			var headGem = new THREE.CylinderGeometry(0, w*0.4, w, 4, 1, false);
+			var headGem = new THREE.CylinderGeometry(0, 0.4, 1, 4, 1, false);
 			return createMesh(headGem, 0xabcdef);
 		}
 
 		function createTail() {
-			var headGem = new THREE.CylinderGeometry(0, w*0.18, w, 6, 1, false);
+			var headGem = new THREE.CylinderGeometry(0, 0.18, 1, 6, 1, false);
 			return createMesh(headGem, 0xabcdef);
 		}
 	}
@@ -237,7 +233,7 @@ var Snake = Life.extend(function() {
 	 * 每个关卡开始时候由game 调用 game会相应传入snake的关卡配置
 	 */
 	this.setUp = function(snakeOptions) {
-		this.preSizeData = this.sizeData = [[0,0,1], [0,1,1], [0,2,1], [0,3,1], [0,4,1]];
+		this.preSizeData = this.sizeData = [[0,0,0], [0,1,0], [0,2,0], [0,3,0], [0,4,0]];
 		this.options = extend(true, {}, snakeOptions);
 	}
 
@@ -258,15 +254,15 @@ var Snake = Life.extend(function() {
 
 		// 从坐标获得平滑线条的点信息
 		var points = [];
-		points = getLinePoint(this.sizeData, percent, w);
+		points = getLinePoint(this.sizeData, percent);
 		points = points.map(function(vec) {
-			return (new THREE.Vector3(vec.x, w, vec.y));
+			return (new THREE.Vector3(vec.x, 0, vec.y));
 		});
 
 		this.bodys.forEach(function(sphere) {
 			scene.scene.remove(sphere);
 		});
-        this.bodys = drawSphereByPoints(points, w);
+        this.bodys = drawSphereByPoints(points);
         this.bodys.forEach(function(sphere) {
 			scene.scene.add(sphere);
 		});
@@ -285,7 +281,7 @@ var Snake = Life.extend(function() {
 
 		angle -= 0.5 * Math.PI;
 
-		var scale = (0.5*w)/Math.sqrt((point1.x-point2.x)*(point1.x-point2.x)+(point1.z-point2.z)*(point1.z-point2.z));
+		var scale = (0.5)/Math.sqrt((point1.x-point2.x)*(point1.x-point2.x)+(point1.z-point2.z)*(point1.z-point2.z));
 
 		mesh.position.x = point1.x + (point1.x-point2.x)*scale;
 		mesh.position.z = point1.z + (point1.z-point2.z)*scale;
@@ -294,7 +290,7 @@ var Snake = Life.extend(function() {
 
 		//camera
 		if (mesh == this.head) {
-			var relativeCameraOffset = new THREE.Vector3(0, -50, -30);
+			var relativeCameraOffset = new THREE.Vector3(0, -8, -5);
 
 			var cameraOffset = relativeCameraOffset.applyMatrix4( this.head.matrixWorld );
 
@@ -303,7 +299,8 @@ var Snake = Life.extend(function() {
 			scene.camera.position.z = cameraOffset.z;
 
 			scene.camera.lookAt(this.head.position);
-			scene.spotLight.target = this.head;
+			scene.directionalLight.position.set(this.head.position.x +2, 5, this.head.position.z +2);
+			scene.directionalLight.target = this.head;
 		}
 	}
 	/* over 画蛇！！！！*/

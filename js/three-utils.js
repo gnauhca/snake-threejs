@@ -5,11 +5,12 @@ function createMesh(geom, color) {
     var meshMaterial = new THREE.MeshLambertMaterial({color: (color || 0xffffff)});
     meshMaterial.side = THREE.DoubleSide;
 
-    var wireFrameMat = new THREE.MeshBasicMaterial();
-    wireFrameMat.wireframe = true;
+    /*var wireFrameMat = new THREE.MeshBasicMaterial();
+    wireFrameMat.wireframe = true;*/
 
     // create a multimaterial
-    var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial/*, wireFrameMat*/]);
+    //var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial/*, wireFrameMat*/]);
+    var mesh = new THREE.Mesh(geom, meshMaterial);
     mesh.castShadow = true;
 
     return mesh;
