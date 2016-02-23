@@ -80,7 +80,7 @@ define(function(require, exports, module) {
 		this.foodhandler = new Foodhandler(this.scene);
 
 		this.init = function() {
-			this.start();
+			//this.start();
 		}
 
 		this.start = function() {

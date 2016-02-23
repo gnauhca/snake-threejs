@@ -101,6 +101,24 @@ var Scene = Time.extend(function () {
 		// create the ground plane
 		var planeGeometry = new THREE.PlaneGeometry(this.width, this.height, this.width, this.height);
 		var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, wireframe: true});
+		var canvas = document.createElement('canvas');
+		var context = canvas.getContext('2d');
+		var img = new Image();
+		var planeTexture;
+
+
+		img.src = 'images/floor.jpg';
+		canvas.width = 256;
+		canvas.height = 256;
+		context.drawImage(img,0,0, 256,256);
+
+		planeTexture = new THREE.Texture(canvas)
+        planeTexture.wrapS = THREE.RepeatWrapping;
+        planeTexture.wrapT = THREE.RepeatWrapping;
+        planeTexture.repeat.set( this.width/4, this.width/4 );
+
+        planeMaterial.map = planeTexture;
+
 		var plane = new THREE.Mesh(planeGeometry, planeMaterial);
 		plane.receiveShadow = true;
 
