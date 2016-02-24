@@ -25,26 +25,23 @@ var hitCalculator = (function() {
 		}
 	}
 
-	hitCalculator.prototype.calculate = function() {
+	// 判断某个物体的碰撞情况
+	hitCalculator.prototype.calculate = function(life) {
 		var that = this;
-		var lifes = this.lifes;
 
 		// 循环判断物体之间是否位置有重叠
-		for (var i = 0,j=0,isHit; i < this.lifes.length; i++) {
-			j = i+1; 
-			for (;j < this.lifes.length; j++) {
-				isHit = this.lifes[i].sizeData.some(function(aCrood) {
-					for (var k=0; k < that.lifes[j].sizeData.length; k++) {
-						if (aCrood[0] === that.lifes[j].sizeData[k][0] &&
-							aCrood[1] === that.lifes[j].sizeData[k][1]) {
-							return true;
-						}
+		for (var i = 0; i < this.lifes.length; i++) {
+			isHit = life.sizeData.some(function(aCrood) {
+				for (var k=0; k < that.lifes[i].sizeData.length; k++) {
+					if (aCrood[0] === that.lifes[i].sizeData[k][0] &&
+						aCrood[1] === that.lifes[i].sizeData[k][1]) {
+						return true;
 					}
-				});
-				if (isHit) {
-					this.lifes[i].handleHit(this.lifes[j].effect);//分别传入对对方的影响
-					this.lifes[j].handleHit(this.lifes[i].effect);//分别传入对对方的影响
 				}
+			});
+			if (isHit) {
+				life.handleHit(this.lifes[i].effect);//分别传入对对方的影响
+				this.lifes[i].handleHit(life);//分别传入对对方的影响
 			}
 		}
 	}
@@ -73,12 +70,11 @@ define(function(require, exports, module) {
 			hitCalculator.removeLife(this);
 		}
 
-		this.handleHit = function(effect) {
+		this.handleHit = function(effect) { }
 
-		}
-
-		this.triggerHitCalculator = function() {
-			hitCalculator.calculate();
+		// 当物体设置位置的时候，使用hitCalculator 计算判断情况
+		this.setSize = function() {
+			hitCalculator.calculate(this);
 		}
 	});
 

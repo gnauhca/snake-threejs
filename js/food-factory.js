@@ -57,22 +57,24 @@ define(function(require, exports, module) {
 		        this.scene.scene.add(mesh);
 
 				this.frameTask = this.addFrameTask(function() {
-		            mesh.rotation.x += 0.01;
-		            mesh.rotation.y += 0.01;
-		            mesh.rotation.z += 0.01;
+		            mesh.rotation.x += 0.03;
+		            mesh.rotation.y += 0.03;
+		            mesh.rotation.z += 0.03;
 				});
 			}
 
 			this.handleHit = function(effect) {
+				var r = 0.03;
 				this.frameTask = this.addFrameTask(function() {
-		            mesh.rotation.x -= 0.3;
-		            mesh.rotation.y -= 0.3;
-		            mesh.rotation.z -= 0.3;
+					r -= 0.0025
+		            mesh.rotation.x += r;
+		            mesh.rotation.y += r;
+		            mesh.rotation.z += r;
 				});
 				that.die();
 				setTimeout(function() {
 					that.destory();
-				}, 800);
+				}, 2000);
 			}
 
 			this.destory = function() {

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>snakedata generator</title>
+</head>
+<script type="text/javascript" src="j.js"></script>
+<style type="text/css">
+body { -moz-user-select: none; }
+* {margin:0; padding: 0; font-family: impact;
+-moz-user-select:-moz-none; 
+-moz-user-select:none; 
+-o-user-select:none; 
+-khtml-user-select:none;
+-webkit-user-select:none;
+-ms-user-select:none; 
+user-select:none;
+}
+h1,h2,h3,h4 {font-weight: normal;}
+h2 {
+	margin: 10px;
+}
+.button, .input {
+	height: 30px;
+	padding: 0 10px;
+}
+
+.clearfix:after {
+	display: block;
+	content: '';
+	clear: both;
+}
+
+table { border-collapse: collapse; table-layout: fixed;	margin: 0 auto; margin-top: 40px;}
+td {width: 23px; height: 23px; border: 1px solid #666; text-align: center; cursor: pointer; overflow: hidden; color: #fff;}
+.wrap {
+	width: 1280px;
+	margin: 0 auto;
+}
+.map-wrap {
+	width: 900px;
+	float: left;
+}
+#map {
+	width: 800px;
+	height: 800px;
+}
+
+.controls-wrap {
+	width: 380px;
+	float: left;
+}
+.control-wrap {
+	padding: 10px;
+	border: 1px solid #888;
+	border-radius: 20px;
+	margin-bottom: 20px;
+}
+#controls {
+	width: 320px;
+	margin: 0 auto;
+}
+.controls-block {
+	float: left;
+	width: 50px;
+	height: 50px;
+	text-align: center;
+	line-height: 50px;
+	margin: 10px;
+	background: #888;
+	cursor: pointer;
+}
+.control-wrap.select{
+	border: 1px solid #abc;
+	box-shadow: 2px 2px 5px #abc;
+}
+.control-wrap.select .select {
+	outline: 1px solid #58a;
+	box-shadow: 2px 2px 5px #58a;	
+}
+
+
+.block {background: #aaa;}
+.block-1 {background: #111}
+.block-2 {background: #555}
+.block-3 {background: #999}
+.block-4 {background: #ddd}
+
+.food-1 {background: #019AA0}
+.food-2 {background: #AFD693}
+.food-3 {background: #FCE680}
+.food-4 {background: #F2AE25}
+
+.food-control-order {background: #eee;}
+.food-control-orderrequired,
+ .food-control-noorderrequired{ background: transparent;}
+.true {
+	font-family: 'microsoft yahei';
+}
+.false {
+	font-family: 'microsoft yahei';
+	color: #333;
+}
+</style>
+<body>
+
+<div class="wrap">
+	<div class="map-wrap">
+		<div id="map"></div>
+	</div>
+	<div class="controls-wrap">
+		<div id="controls">
+			<h2>Block Type</h2>
+			<div class="control-wrap clearfix block-control-wrap">
+				<div class="controls-block block-control block-1" data-mousedata="blocktype,block-1"></div>
+				<div class="controls-block block-control block-2" data-mousedata="blocktype,block-2"></div>
+				<div class="controls-block block-control block-3" data-mousedata="blocktype,block-3"></div>
+				<div class="controls-block block-control block-4" data-mousedata="blocktype,block-4"></div>
+			</div>
+			<h2>Food Option</h2>
+			<div class="control-wrap clearfix food-control-wrap">
+				<h4>Food Type</h4>
+				<div class="clearfix food-control-type-wrap">
+					<div class="controls-block food-control-type food-1" data-mousedata="foodtype,food-1"></div>
+					<div class="controls-block food-control-type food-2" data-mousedata="foodtype,food-2"></div>
+					<div class="controls-block food-control-type food-3" data-mousedata="foodtype,food-3"></div>
+					<div class="controls-block food-control-type food-4" data-mousedata="foodtype,food-4"></div>
+				</div>
+				<h4>Food Order</h4>
+				<div class="clearfix food-control-order-wrap">
+					<div class="controls-block food-control-order foodorder-1" data-mousedata="foodorder,foodorder-1">1</div>
+					<div class="controls-block food-control-order foodorder-2" data-mousedata="foodorder,foodorder-2">2</div>
+					<div class="controls-block food-control-order foodorder-3" data-mousedata="foodorder,foodorder-3">3</div>
+					<div class="controls-block food-control-order foodorder-4" data-mousedata="foodorder,foodorder-4">4</div>
+					<div class="controls-block food-control-order foodorder-5" data-mousedata="foodorder,foodorder-5">5</div>
+					<div class="controls-block food-control-order foodorder-6" data-mousedata="foodorder,foodorder-6">6</div>
+					<div class="controls-block food-control-order foodorder-7" data-mousedata="foodorder,foodorder-7">7</div>
+					<div class="controls-block food-control-order foodorder-8" data-mousedata="foodorder,foodorder-8">8</div>
+				</div>
+
+				<h4>Food Order Require</h4>
+				<div class="clearfix food-control-orderrequired-wrap">
+					<div class="controls-block food-control-orderrequired" data-mousedata="foodorderrequired,true">Y</div>
+					<div class="controls-block food-control-noorderrequired" data-mousedata="foodorderrequired,false">N</div>
+				</div>
+			</div>
+
+			<h2>Map</h2>
+			<div class="control-wrap map-control-wrap">
+				<input id="mapSizeValue" class="input" type="text" id="setSize"/>
+				<button id="setMapSizeBtn" class="button">Set Map Size</button>
+				<button id="getMapDataBtn" class="button">Get JSON</button>
+			</div>
+		</div>	
+	</div>
+</div>
+
+
+
+<script type="text/javascript">
+
+var Map = function(size, mapId) {
+	this.mousedata;
+	this.gridDatas = [];
+	this.size = size;
+	this.mapElem = document.getElementById(mapId);
+	this.init();
+}
+
+Map.prototype = {
+	init : function() {
+		this.initEvent();
+		this.resetSize(this.size);
+	},
+
+	initEvent : function() {
+		var that = this;
+
+		this.mapElem.addEventListener('dblclick', function(event) {
+			var target = event.target;
+			if (target.tagName.toLowerCase() === 'td') {
+				that.setGrid(null, target);
+			}
+		});
+
+		(function () {
+			var mouseDownTime = 0,
+				isMouseDown = false;
+
+			function mouseoverFun(event) {
+				var target = event.target;
+
+				event.preventDefault();
+				if (target.tagName.toLowerCase() === 'td') {
+
+					var eTime = target.getAttribute('mouseDownTime');
+
+					if (eTime && parseInt(eTime) === mouseDownTime && event.type !== 'click') {
+						return;
+					}
+
+					that.setGrid(that.mousedata[that.mousedata.datatype], target, that.mousedata.datatype);
+					target.setAttribute('mouseDownTime', mouseDownTime);
+				}
+				return false;
+			}
+
+			that.mapElem.addEventListener('click', mouseoverFun);
+
+			that.mapElem.addEventListener('mousedown', function(event) {
+				isMouseDown = true;
+				mouseDownTime = (new Date()).getTime();
+
+				setTimeout(function() {
+					if (isMouseDown)
+					that.mapElem.onmouseover = mouseoverFun;
+				}, 100);
+			});		
+
+			document.addEventListener('mouseup', function(event) {
+				isMouseDown = false;
+				that.mapElem.onmouseover = null;
+			});		
+		})();
+	},
+
+	setUpMap : function (gridDatas) {
+		var rows = this.mapElem.getElementsByTagName('tr')
+
+		this.gridDatas = gridDatas;
+
+		for (var i = 0; i < gridDatas.length; i++) {
+			var tds = rows[i].getElementsByTagName('td');
+
+			for (var j = 0; j < gridDatas.length; j++) {
+				this.setGrid(gridDatas[i][j], tds[j]);
+			}
+		}
+	},
+
+	getData : function () {
+		return this.gridDatas;
+	},
+
+	setGrid : function (_gridData, gridElem, datatype) { 
+		var crood = gridElem.dataset.crood.split(','),
+			gridData = _gridData;
+
+		if (!_gridData) {
+			this.gridDatas[crood[0]][crood[1]] = null;
+			gridElem.className = '';
+			gridElem.innerHTML = '';
+		} else {
+			this.gridDatas[crood[0]][crood[1]] = _gridData;
+			this.gridDatas[crood[0]][crood[1]].datatype = datatype;
+
+			gridElem.className = '';
+			for (var key in gridData) {
+				$(gridElem).addClass(gridData[key])
+			}
+			gridElem.innerHTML = (gridData.foodorder?gridData.foodorder.replace(/[^\d]/g, ''):'');
+		}
+	},
+
+	resetSize : function (newSize) {
+		var mapSizeDiff = parseInt((newSize - this.size)/2),
+			newGridDatas = [],
+			tableHTML = '<table>';
+
+		for (var i = 0; i < newSize; i++) {
+			tableHTML += '<tr>'
+			newGridDatas[i] = [];
+			for (var j = 0; j < newSize; j++) {
+				newGridDatas[i][j] = null;
+				tableHTML += '<td data-crood="'+i+','+j+'"></td>';
+			};
+			tableHTML += '</tr>'
+		};
+		tableHTML += '</table>';
+		this.mapElem.innerHTML = tableHTML;
+
+		if (this.gridDatas.length)
+		for (var i = this.size - 1; i >= 0; i--) {
+			for (var j = this.size - 1; j >= 0; j--) {
+				if (i+mapSizeDiff>=0&&j+mapSizeDiff>=0&&i+mapSizeDiff<newSize&&j+mapSizeDiff<newSize&&this.gridDatas[i][j]) {
+
+					//console.log(i+mapSizeDiff,j+mapSizeDiff)
+					newGridDatas[i+mapSizeDiff][j+mapSizeDiff] = this.gridDatas[i][j];
+				}
+			};
+		};
+
+		this.size = newSize;
+		this.setUpMap(newGridDatas);
+	},
+
+	setMouseData: function(mousedata) {
+		this.mousedata = mousedata;
+	}
+}
+
+
+
+var controler = (function() {
+	var mousedata,
+		map,
+		mapSize = 30,
+		blockControlWrap = document.querySelectorAll('.block-control-wrap')[0],
+		foodControlWrap = document.querySelectorAll('.food-control-wrap')[0],
+		mapControlWrap = document.querySelectorAll('.map-control-wrap')[0];
+
+	mousedata = {
+		"datatype": "block",
+		"food": {
+			"foodtype": "food-1",
+			"foodorder": "1",
+			"foodorderrequired": "true"			
+		},
+		"block": {
+			'blocktype': 'block-1'
+		}
+
+	}
+
+	function init() {
+		map = new Map(30, 'map');
+
+		$('.block-control-wrap,.food-control-wrap').on('click', function() {
+			$('.block-control-wrap,.food-control-wrap').removeClass('select');
+			$(this).addClass('select');
+		});
+
+		$('.controls-block').on('click', function() {
+			var ctsData = $(this).data('mousedata').split(','),
+				key = ctsData[0],
+				val = ctsData[1];
+
+			$(this).addClass('select').siblings().removeClass('select');
+			mousedata.datatype = key.match(/^block/)?'block':'food';
+			mousedata[mousedata.datatype][key] = val;
+			map.setMouseData(mousedata);
+		});
+
+		$('#setMapSizeBtn').on('click', function() {
+			var mapSize = parseInt($('#mapSizeValue').val());
+
+			if (!isNaN(mapSize) && mapSize<100&&mapSize>0) {
+				map.resetSize(mapSize);
+			}
+		});
+		
+		$('#getMapDataBtn').on('click', function() {
+			var mapData = map.getData(),
+				jsonData = {block: [], food: []};
+
+			for (var i = mapData.length - 1; i >= 0; i--) {
+				for (var j = mapData.length - 1; j >= 0; j--) {
+					if (!mapData[i][j]) continue;
+
+					var data = mapData[i][j].datatype === 'food'?jsonData.food:jsonData.block,
+						tmp = {};
+					
+					for (var key in mapData[i][j]) {
+						if (key !== 'datatype')
+						tmp[key] = mapData[i][j][key]
+					}
+					data.push(tmp);
+				};
+			};
+			console.log(JSON.stringify(jsonData));
+		});
+
+		$('.food-1, .foodorder-1, .food-control-orderrequired, .block-1').click();
+		$('.block-1').click();
+	}
+
+
+	init();
+})();
+</script>	
+</body>
+</html>

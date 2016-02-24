@@ -178,8 +178,9 @@ var Snake = Life.extend(function() {
 	this.head;
 	this.tail;
 	this.bodys=[]; //shape
-	this.preSizeData;//[x,z,正反面1for正]
-	this.sizeData;
+	this.historySizeData = [];//历史位置信息
+	this.sizeData=[];
+	this.nextSizeData=[]; // 下一位置信息
 	this.dir = 2; //0 - 3 -> 上 - 左 上为y轴正方向
 	this.nextDir = 2; 
 	this.options = {};
@@ -189,7 +190,6 @@ var Snake = Life.extend(function() {
 		this.super();
 		scene = _scene;
 
-		this.sizeData = extend(true, [], this.preSizeData);
 		this.head = createHead();
 		this.tail = createTail();
 
@@ -233,7 +233,8 @@ var Snake = Life.extend(function() {
 	 * 每个关卡开始时候由game 调用 game会相应传入snake的关卡配置
 	 */
 	this.setUp = function(snakeOptions) {
-		this.preSizeData = this.sizeData = [[0,0,0], [0,1,0], [0,2,0], [0,3,0], [0,4,0]];
+		this.sizeData = [[0,0,0], [0,1,0], [0,2,0], [0,3,0], [0,4,0]];
+		this.historySizeData = [];
 		this.options = extend(true, {}, snakeOptions);
 	}
 
@@ -289,7 +290,7 @@ var Snake = Life.extend(function() {
 
 
 		//camera
-		if (mesh == this.head) {
+		/*if (mesh == this.head) {
 			var relativeCameraOffset = new THREE.Vector3(0, -8, -5);
 
 			var cameraOffset = relativeCameraOffset.applyMatrix4( this.head.matrixWorld );
@@ -301,20 +302,15 @@ var Snake = Life.extend(function() {
 			scene.camera.lookAt(this.head.position);
 			scene.directionalLight.position.set(this.head.position.x +2, 5, this.head.position.z +2);
 			scene.directionalLight.target = this.head;
-		}
+		}*/
 	}
 	/* over 画蛇！！！！*/
 
 	time = 100;//for test
 	function move() {time--; 
 
-		that.preSizeData = that.sizeData;
-
 		that.setDir(that.nextDir);
-		that.setNextData();
-		that.sizeData.pop();
-		that.triggerHitCalculator();
-
+		that.setSize();
 		// todo 判断碰撞
 
 		//console.log(time)
@@ -334,9 +330,11 @@ var Snake = Life.extend(function() {
 	}
 
 	// 计算下一步位置信息，此方法只unshift 一个位置，而不删除尾部最后位置（考虑到会吃到食物的情况）
-	this.setNextData = function() {
-		this.sizeData = extend(true, [], this.preSizeData);
+	this.setSize = function() {
+		this.historySizeData.unshift(this.sizeData);//当前位置存入历史位置
+		this.historySizeData.length  = this.historySizeData.length>100 ? 100:this.historySizeData.length;
 
+		this.sizeData = extend(true, [], this.sizeData);
 		var newGrid = extend(true, [], this.sizeData[0]);
 		switch (this.dir) {
 			case 0:
@@ -351,7 +349,11 @@ var Snake = Life.extend(function() {
 			case 3:
 				newGrid[0]--;
 		}
+
 		this.sizeData.unshift(newGrid);	
+		this.sizeData.pop();
+
+		this.super.setSize();
 	}
 });
 

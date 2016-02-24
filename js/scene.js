@@ -39,18 +39,6 @@ var Scene = Time.extend(function () {
 		this.scene.add(this.camera);
 
 
-		/*var cube = new THREE.CubeGeometry(2,2,2);
-		var cubeMeterial = new THREE.MeshLambertMaterial({color: 0xffffff});
-		var cubeMesh = new THREE.Mesh(cube,cubeMeterial);
-
-		cubeMesh.position.set(0,2,0);
-
-		cubeMesh.castShadow = true;
-
-		this.scene.add(cubeMesh);
-		this.camera.position.set(5,5,5);
-		this.camera.lookAt(new THREE.Vector3(0, 0, 0));*/
-
 		/* light */
 
         // add subtle ambient lighting
@@ -66,7 +54,7 @@ var Scene = Time.extend(function () {
         spotLight.shadowCameraFov = 20;
         spotLight.shadowCameraVisible = true;    
 		spotLight.intensity = 0.8;
-	    spotLight.position.set(0, 10, -00);
+	    spotLight.position.set(0, 10, -0);
 	    spotLight.angle = 1.3;
 
         this.spotLight = spotLight;
@@ -100,36 +88,22 @@ var Scene = Time.extend(function () {
 
 		// create the ground plane
 		var planeGeometry = new THREE.PlaneGeometry(this.width, this.height, this.width, this.height);
-		var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, wireframe: true});
-		var canvas = document.createElement('canvas');
-		var context = canvas.getContext('2d');
-		var img = new Image();
-		var planeTexture;
-
-
-		img.src = 'images/floor.jpg';
-		canvas.width = 256;
-		canvas.height = 256;
-		context.drawImage(img,0,0, 256,256);
-
-		planeTexture = new THREE.Texture(canvas)
-        planeTexture.wrapS = THREE.RepeatWrapping;
-        planeTexture.wrapT = THREE.RepeatWrapping;
+		var planeMaterial = new THREE.MeshLambertMaterial({/*color: 0xffffff,*/ wireframe: true});
+		var planeTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
+        planeTexture.wrapS = planeTexture.wrapT = THREE.RepeatWrapping;
         planeTexture.repeat.set( this.width/4, this.width/4 );
-
         planeMaterial.map = planeTexture;
-
 		var plane = new THREE.Mesh(planeGeometry, planeMaterial);
 		plane.receiveShadow = true;
 
 		// rotate and position the plane
 		plane.position.x = 0;
-		plane.position.y = 0;
+		plane.position.y = -1;
 		plane.position.z = 0;
 		plane.rotation.x = -Math.PI * 0.5;
 		this.scene.add(plane);
 
-		webGLRenderer.render(that.scene, that.camera);
+		setTimeout(function() {webGLRenderer.render(that.scene, that.camera);}, 0);
 		var frameTask = this.addFrameTask(function() {
 			webGLRenderer.render(that.scene, that.camera);
 		});
