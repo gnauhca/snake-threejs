@@ -47,7 +47,7 @@ var drawSphereByPoints = (function() {
 var getLinePoint = (function() {
 	var croodPoints = [],
 		percent, //单位
-		segment = 10;
+		segment = 15;
 
 	function drawGrid(prev, now, next, percent) {
 		var percent = percent || 1;
@@ -290,7 +290,7 @@ var Snake = Life.extend(function() {
 
 
 		//camera
-		/*if (mesh == this.head) {
+		if (mesh == this.head) {
 			var relativeCameraOffset = new THREE.Vector3(0, -8, -5);
 
 			var cameraOffset = relativeCameraOffset.applyMatrix4( this.head.matrixWorld );
@@ -302,7 +302,7 @@ var Snake = Life.extend(function() {
 			scene.camera.lookAt(this.head.position);
 			scene.directionalLight.position.set(this.head.position.x +2, 5, this.head.position.z +2);
 			scene.directionalLight.target = this.head;
-		}*/
+		}
 	}
 	/* over 画蛇！！！！*/
 
@@ -329,7 +329,7 @@ var Snake = Life.extend(function() {
 		this.dir = dir;
 	}
 
-	// 计算下一步位置信息，此方法只unshift 一个位置，而不删除尾部最后位置（考虑到会吃到食物的情况）
+	// 计算下一步位置信息
 	this.setSize = function() {
 		this.historySizeData.unshift(this.sizeData);//当前位置存入历史位置
 		this.historySizeData.length  = this.historySizeData.length>100 ? 100:this.historySizeData.length;
@@ -354,6 +354,9 @@ var Snake = Life.extend(function() {
 		this.sizeData.pop();
 
 		this.super.setSize();
+	}
+
+	this.handleHit = function(effect) {
 	}
 });
 

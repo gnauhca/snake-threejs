@@ -2,7 +2,7 @@
 
 define(function(require, exports, module) {
 
-var blockFactory = require('block-factory.js');
+var blockFactory = require('./block-factory.js');
 
 var BlockHandler = Class.extend(function() {
 	var that = this;

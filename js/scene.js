@@ -42,7 +42,7 @@ var Scene = Time.extend(function () {
 		/* light */
 
         // add subtle ambient lighting
-        var ambiColor = "#111111";
+        var ambiColor = "#222222";
         var ambientLight = new THREE.AmbientLight(ambiColor);
         this.scene.add(ambientLight);
 
@@ -88,7 +88,7 @@ var Scene = Time.extend(function () {
 
 		// create the ground plane
 		var planeGeometry = new THREE.PlaneGeometry(this.width, this.height, this.width, this.height);
-		var planeMaterial = new THREE.MeshLambertMaterial({/*color: 0xffffff,*/ wireframe: true});
+		var planeMaterial = new THREE.MeshLambertMaterial({/*color: 0xffffff, wireframe: true*/});
 		var planeTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
         planeTexture.wrapS = planeTexture.wrapT = THREE.RepeatWrapping;
         planeTexture.repeat.set( this.width/4, this.width/4 );

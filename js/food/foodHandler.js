@@ -2,14 +2,14 @@
 
 define(function(require, exports, module) {
 
-var foodFactory = require('food-factory.js');
+var foodFactory = require('./food-factory.js');
 
 var FoodHandler = Class.extend(function() {
 	var that = this;
 	this.foodDatas;
 	this.orderFoods = []; // 影响食物出现次序的食物 既orderRequired为true的
 	this.xorderFoods; // 对食物出现次序没有影响的页面
-	this.currentOrder = 0; //当前是第几批次的食物
+	this.currentOrder = 1; //当前是第几批次的食物
 	this.scene;
 
 	this.constructor = function(scene) {
@@ -42,7 +42,7 @@ var FoodHandler = Class.extend(function() {
 			foodData = this.foodDatas[i];
 			
 			//console.log(foodData)
-			if (foodData.order === this.currentOrder) {
+			if (parseInt(foodData.order) === this.currentOrder) {
 				food = foodFactory.getFood(this.scene, foodData.type, foodData, function(_food) {that.handleFoodDestory(_food)});
 				if (foodData.orderRequired) {
 					this.orderFoods.push(food);
@@ -52,6 +52,10 @@ var FoodHandler = Class.extend(function() {
 				this.foodDatas.splice(i, 1);
 			}
 		};
+		if (this.orderFoods.length === 0) {
+			this.currentOrder++
+			this.createFoods();
+		}
 	}
 
 	// 处理食物消失事件

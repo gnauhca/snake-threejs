@@ -42,7 +42,7 @@ define(function(require, exports, module) {
 		        // create a cube
 		        var cubeGeometry = new THREE.BoxGeometry(1,1,1);
 
-		        mesh = createMesh(cubeGeometry, blockData.color);
+		        mesh = createMesh(cubeGeometry, '#997');
 
 		        this.sizeData = [blockData.size];
 		        mesh.position.x = blockData.size[0];

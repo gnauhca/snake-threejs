@@ -31,8 +31,6 @@ h2 {
 	clear: both;
 }
 
-table { border-collapse: collapse; table-layout: fixed;	margin: 0 auto; margin-top: 40px;}
-td {width: 23px; height: 23px; border: 1px solid #666; text-align: center; cursor: pointer; overflow: hidden; color: #fff;}
 .wrap {
 	width: 1280px;
 	margin: 0 auto;
@@ -42,9 +40,11 @@ td {width: 23px; height: 23px; border: 1px solid #666; text-align: center; curso
 	float: left;
 }
 #map {
-	width: 800px;
-	height: 800px;
+	width: 900px;
+	height: 900px;
 }
+table {width: 900px; height: 900px; border-collapse: collapse; table-layout: fixed;	margin: 0 auto; margin-top: 40px;}
+td {border: 1px solid #666; text-align: center; cursor: pointer; overflow: hidden; color: #fff;}
 
 .controls-wrap {
 	width: 380px;
@@ -128,14 +128,14 @@ td {width: 23px; height: 23px; border: 1px solid #666; text-align: center; curso
 				</div>
 				<h4>Food Order</h4>
 				<div class="clearfix food-control-order-wrap">
-					<div class="controls-block food-control-order foodorder-1" data-mousedata="foodorder,foodorder-1">1</div>
-					<div class="controls-block food-control-order foodorder-2" data-mousedata="foodorder,foodorder-2">2</div>
-					<div class="controls-block food-control-order foodorder-3" data-mousedata="foodorder,foodorder-3">3</div>
-					<div class="controls-block food-control-order foodorder-4" data-mousedata="foodorder,foodorder-4">4</div>
-					<div class="controls-block food-control-order foodorder-5" data-mousedata="foodorder,foodorder-5">5</div>
-					<div class="controls-block food-control-order foodorder-6" data-mousedata="foodorder,foodorder-6">6</div>
-					<div class="controls-block food-control-order foodorder-7" data-mousedata="foodorder,foodorder-7">7</div>
-					<div class="controls-block food-control-order foodorder-8" data-mousedata="foodorder,foodorder-8">8</div>
+					<div class="controls-block food-control-order foodorder-1" data-mousedata="foodorder,1">1</div>
+					<div class="controls-block food-control-order foodorder-2" data-mousedata="foodorder,2">2</div>
+					<div class="controls-block food-control-order foodorder-3" data-mousedata="foodorder,3">3</div>
+					<div class="controls-block food-control-order foodorder-4" data-mousedata="foodorder,4">4</div>
+					<div class="controls-block food-control-order foodorder-5" data-mousedata="foodorder,5">5</div>
+					<div class="controls-block food-control-order foodorder-6" data-mousedata="foodorder,6">6</div>
+					<div class="controls-block food-control-order foodorder-7" data-mousedata="foodorder,7">7</div>
+					<div class="controls-block food-control-order foodorder-8" data-mousedata="foodorder,8">8</div>
 				</div>
 
 				<h4>Food Order Require</h4>
@@ -244,15 +244,17 @@ Map.prototype = {
 
 	setGrid : function (_gridData, gridElem, datatype) { 
 		var crood = gridElem.dataset.crood.split(','),
-			gridData = _gridData;
+			i = parseInt(crood[0]),
+			j = parseInt(crood[1]),
+			gridData = _gridData? $.extend({},_gridData): null;
 
-		if (!_gridData) {
-			this.gridDatas[crood[0]][crood[1]] = null;
+		if (!gridData) {
+			this.gridDatas[i][j] = null;
 			gridElem.className = '';
 			gridElem.innerHTML = '';
 		} else {
-			this.gridDatas[crood[0]][crood[1]] = _gridData;
-			this.gridDatas[crood[0]][crood[1]].datatype = datatype;
+			this.gridDatas[i][j] = gridData;
+			this.gridDatas[i][j].datatype = datatype;
 
 			gridElem.className = '';
 			for (var key in gridData) {
@@ -265,6 +267,7 @@ Map.prototype = {
 	resetSize : function (newSize) {
 		var mapSizeDiff = parseInt((newSize - this.size)/2),
 			newGridDatas = [],
+			width = (100/newSize) + '%',
 			tableHTML = '<table>';
 
 		for (var i = 0; i < newSize; i++) {
@@ -272,7 +275,7 @@ Map.prototype = {
 			newGridDatas[i] = [];
 			for (var j = 0; j < newSize; j++) {
 				newGridDatas[i][j] = null;
-				tableHTML += '<td data-crood="'+i+','+j+'"></td>';
+				tableHTML += '<td data-crood="'+j+','+i+'" width="'+width+'"></td>';
 			};
 			tableHTML += '</tr>'
 		};
@@ -304,7 +307,7 @@ Map.prototype = {
 var controler = (function() {
 	var mousedata,
 		map,
-		mapSize = 30,
+		mapSize = 20,
 		blockControlWrap = document.querySelectorAll('.block-control-wrap')[0],
 		foodControlWrap = document.querySelectorAll('.food-control-wrap')[0],
 		mapControlWrap = document.querySelectorAll('.map-control-wrap')[0];
@@ -323,7 +326,7 @@ var controler = (function() {
 	}
 
 	function init() {
-		map = new Map(30, 'map');
+		map = new Map(mapSize, 'map');
 
 		$('.block-control-wrap,.food-control-wrap').on('click', function() {
 			$('.block-control-wrap,.food-control-wrap').removeClass('select');
@@ -344,30 +347,48 @@ var controler = (function() {
 		$('#setMapSizeBtn').on('click', function() {
 			var mapSize = parseInt($('#mapSizeValue').val());
 
-			if (!isNaN(mapSize) && mapSize<100&&mapSize>0) {
+			if (!isNaN(mapSize) && mapSize<=100&&mapSize>0) {
 				map.resetSize(mapSize);
 			}
 		});
 		
 		$('#getMapDataBtn').on('click', function() {
 			var mapData = map.getData(),
-				jsonData = {block: [], food: []};
+				halfMapLength = parseInt(mapData.length/2),
+				jsonData = {block: [], food: []},
+				keyMapping = {
+					'foodtype': 'type',
+					'foodorder': 'order',
+					'foodorderrequired': 'orderRequired',
+					'blocktype': 'type'
+				},
+				valMapping = {
+					'true': true,
+					'false': false,
+					'block-1': 'normal',
+					'block-2': 'solid',
+					'food-1': 'normal',
+					'food-2': 'double',
+					'food-3': 'accelerator',
+					'food-4': 'life',
+				};
 
 			for (var i = mapData.length - 1; i >= 0; i--) {
 				for (var j = mapData.length - 1; j >= 0; j--) {
 					if (!mapData[i][j]) continue;
 
 					var data = mapData[i][j].datatype === 'food'?jsonData.food:jsonData.block,
-						tmp = {};
+						tmp = {size: [i-halfMapLength,j-halfMapLength]};
 					
 					for (var key in mapData[i][j]) {
-						if (key !== 'datatype')
-						tmp[key] = mapData[i][j][key]
+						if (key !== 'datatype') {
+							tmp[(keyMapping[key]||key)] = (valMapping[mapData[i][j][key]])||mapData[i][j][key];
+						}
 					}
 					data.push(tmp);
 				};
 			};
-			console.log(JSON.stringify(jsonData));
+			console.log(JSON.stringify(jsonData, null, '\t'));
 		});
 
 		$('.food-1, .foodorder-1, .food-control-orderrequired, .block-1').click();

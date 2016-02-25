@@ -49,6 +49,25 @@ var hitCalculator = (function() {
 	return new hitCalculator();
 })();
 
+/*
+effect
+{
+	'snake': {
+		'length': 2
+		'score': 10
+		'life': 1 //生命加成
+		'time': 10 //时间加成
+		'accelerate': true
+		'damage': 100
+	}
+	'food': {
+		'damage': 100
+	}
+	'block': {
+		'damage': 100
+	}
+}
+ */
 
 define(function(require, exports, module) {
 	var Time = require('time');
