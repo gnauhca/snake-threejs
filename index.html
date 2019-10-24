@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>snake</title>
+	<style type="text/css">
+	* {margin: 0; padding: 0;}
+	body {overflow: hidden;}
+	</style>
+</head>
+<body>
+	
+	<div class="gamebox">
+		<img id="floor" src="images/floor.jpg" style="display: none">
+		<div class="start-btn"></div>
+		<div id="renderDom"></div>
+	</div>
+
+
+<script src="js/common.js"></script>
+<script src="js/three-utils.js"></script>
+<script src="js/libs/three.js"></script>
+<script src="js/libs/tween.min.js"></script>
+<script src="js/libs/sea.js"></script>
+<script>
+	seajs.config({
+		base: './js',
+	});
+	seajs.use('game',function(Game) {
+
+		var gameData = {
+			speed: 400, //蛇的速度
+			mapInfo: {},
+			blocks: {},//障碍
+			time: 120,//总时间限制
+			score: 2000 //需要得几分过关
+		}
+
+		var game = new Game(gameData);
+		game.init();
+	});
+</script>
+</body>
+</html>
