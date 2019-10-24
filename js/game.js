@@ -18,8 +18,8 @@ define(function(require, exports, module) {
 	var Time = require('time');
 	var Scene = require('scene');
 	var Snake = require('snake');
-	var Foodhandler = require('food/foodhandler');
-	var Blockhandler = require('block/blockhandler');
+	var Foodhandler = require('food/food-handler');
+	var Blockhandler = require('block/block-handler');
 
 	var Game = Time.extend(function() {
 		var score;
